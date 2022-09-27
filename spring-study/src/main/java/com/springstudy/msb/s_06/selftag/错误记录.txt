@@ -1,0 +1,6 @@
+
+1、bug：Spring.handles必须为大写的原因
+
+原因：gradle工程的docs.gradle，220行左右，它检测到有spring开头的文件，就会报一个错误
+
+解决：注释掉即可

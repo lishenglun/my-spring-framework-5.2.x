@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/aop
+	   http://www.springframework.org/schema/aop/spring-aop.xsd
+	   http://www.springframework.org/schema/context
+	   https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<bean id="logUtil" class="com.springstudy.msb.s_21.LogUtil"/>
+	<bean id="myCalculator" class="com.springstudy.msb.s_21.MyCalculator"/>
+	<bean id="global" class="com.springstudy.msb.s_21.LogUtil"/>
+
+	<!--	切面（aspect）：切入点和通知的结合		-->
+	<!--	<aop:config proxy-target-class="false">		-->
+	<aop:config>
+		<!--	ref：引用配置好的通知类（advisor）bean的id		-->
+		<!--	引入通知类，然后配置"通知类里面的通知"对哪些切入点进行切入	-->
+		<aop:aspect ref="logUtil" >
+			<!--	切入点（pointcut）		-->
+			<aop:pointcut id="myPoint" expression="execution(* com.springstudy.msb.s_21.MyCalculator.*(..))"/>
+			<!--	xml是以下标作为排序值的		-->
+			<!--	通知类型（advice）		-->
+			<aop:around method="around" pointcut-ref="myPoint"/>
+			<aop:before method="start" pointcut-ref="myPoint"/>
+			<aop:after-returning method="stop" pointcut-ref="myPoint" returning="result"/>
+			<aop:after-throwing method="logException" pointcut-ref="myPoint" throwing="e"/>
+			<aop:after method="logFinally" pointcut-ref="myPoint"/>
+		</aop:aspect>
+		<!--	<aop:aspect ref="global"></aop:aspect>	-->
+	</aop:config>
+
+	<!--	让aop注解生效	-->
+	<!--	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>		-->
+
+</beans>

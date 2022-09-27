@@ -1,0 +1,61 @@
+<!DOCTYPE web-app PUBLIC
+		"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+		"http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+		 version="3.0">
+
+	<!--	tomcat容器参数	-->
+	<context-param>
+		<!--	spring的配置文件位置	-->
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:msb/spring/spring-other-interceptor.xml</param-value>
+	</context-param>
+
+	<!--
+
+	在以前使用servlet的时候，是一个请求一个servlet，现在spring mvc里面，是所有的请求，都走一个servlet，就是spring mvc的DispatcherServlet，
+	然后由DispatcherServlet根据请求路径，分发请求到不同的handler
+
+	-->
+	<servlet>
+		<servlet-name>mvc-test</servlet-name>
+		<!--	DispatcherServlet的init()方法会初始化spring mvc的容器	-->
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!--	spring mvc的配置文件位置	-->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:msb/springmvc/springmvc-other-interceptor.xml</param-value>
+		</init-param>
+		<!--	为0或正整数，表示在服务器启动的时候进行创建	-->
+		<!--	为负数，表示在第一次访问的时候进行创建	-->
+		<load-on-startup>1</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>mvc-test</servlet-name>
+		<!--	代表DispatcherServlet拦截所有浏览器过来的请求路径	-->
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<!--	监听器：用于初始化spring容器	-->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!--	异步servlet	-->
+	<servlet>
+		<servlet-name>AsyncServlet</servlet-name>
+		<servlet-class>com.springstudymvc.msb.mvc_11.AsyncServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AsyncServlet</servlet-name>
+		<url-pattern>/async</url-pattern>
+	</servlet-mapping>
+
+</web-app>

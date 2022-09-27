@@ -1,0 +1,5 @@
+1、springmvc中定义controller的方式
+
+一共三种方式：实现Controller接口、实现HttpRequestHandler接口、@Controller
+
+注意：实现Controller接口、实现HttpRequestHandler接口，这2种方式在定义beanName的时候，需要以"/"开头，表示请求的映射路径

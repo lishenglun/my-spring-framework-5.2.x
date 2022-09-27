@@ -1,0 +1,11 @@
+1、JSP：Java Service Page：Java服务端页面：把html标签跟Java代码拆分开了，同时JSP页面里面可以写Java代码。
+
+JSP的本质是Servlet。JSP它翻译之后是一个Servlet程序。JSP编译器可以把"JSP文件"编译成用Java代码写的"Servlet";然后再由Java编译器来编译成能快速执行的二进制机器码，也可以直接编译成二进制码。
+
+原来我们在进行纯Servlet编写的时候，例如：写一个doPost()，在里面获取到PrintlnOut对象，然后out.write("<h1></h1>")，这样写太麻烦了，所以后面有了JSP，
+把html标签跟Java代码拆分开了，同时JSP页面里面可以写Java代码。
+
+《JSP技术》参考：https://www.jianshu.com/p/9bb0beaadf17
+《jsp和javascript的区别》参考：https://www.jianshu.com/p/88db37562751
+
+2、Java SPI机制详解

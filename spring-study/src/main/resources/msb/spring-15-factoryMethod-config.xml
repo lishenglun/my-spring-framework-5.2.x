@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<!--	1、静态工厂实例化bean	-->
+	<bean id="person" class="com.springstudy.msb.s_15.factoryMethod.PersonStaticFactory" factory-method="getPerson">
+		<!--	constructor-arg可以为方法指定参数	-->
+		<constructor-arg value="lisi"></constructor-arg>
+	</bean>
+
+	<!--	2、实例工厂实例化bean	-->
+	<bean id="personInstanceFactory" class="com.springstudy.msb.s_15.factoryMethod.PersonInstanceFactory"/>
+	<!--	factory-bean：指定使用哪个工厂实例		factory-bean：指定使用哪个工厂实例的方法	-->
+	<bean id="person2" class="com.springstudy.msb.s_15.factoryMethod.Person" factory-bean="personInstanceFactory" factory-method="getPerson">
+		<constructor-arg value="wangwu"></constructor-arg>
+	</bean>
+
+</beans>

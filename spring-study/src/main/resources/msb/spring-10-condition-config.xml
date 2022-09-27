@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<bean id="myComponent" class="com.springstudy.msb.s_10.MyComponent"></bean>
+
+	<!--
+
+	注入了myComponent对象还不够，因为不会解析myComponent上面的注解，
+	必须要存在ConfigurationClassPostProcessor对象，才会解析myComponent上面的注解。
+	要想ConfigurationClassPostProcessor对象存在，有两种方式：
+		1、加入<context:component-scan>标签，这样就自动会注入ConfigurationClassPostProcessor对象
+		2、直接注入ConfigurationClassPostProcessor对象
+
+	-->
+
+	<context:component-scan base-package="com.springstudy.msb.s_10.importSelector"></context:component-scan>
+<!--	<bean class="org.springframework.context.annotation.ConfigurationClassPostProcessor"></bean>-->
+
+</beans>

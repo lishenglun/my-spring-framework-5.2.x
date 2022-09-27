@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
+	   >
+
+	<context:component-scan base-package="com.springstudy.Initializethebean.Autowired"/>
+
+
+	<!-- 测试@Autowired是否可以按名称注入 -->
+	<!--<bean id="a2" class="com.springstudy.Initializethebean.Autowired.A3"/>-->
+
+	<!--  测试@Resource()是否可以按照类型注入	-->
+	<bean id="a2222" class="com.springstudy.Initializethebean.Autowired.A2"/>
+
+
+</beans>

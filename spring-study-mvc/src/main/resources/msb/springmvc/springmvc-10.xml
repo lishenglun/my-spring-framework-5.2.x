@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       https://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/util
+       https://www.springframework.org/schema/util/spring-util.xsd">
+
+	<context:component-scan base-package="com.springstudymvc.msb.mvc_10"/>
+<!--	<mvc:default-servlet-handler/>-->
+
+
+	<!--
+		⚠️这个标签会自动加载默认的，处理器映射器，处理器适配器，处理器异常解析器，到容器中！（也就是DispatcherServlet.properties中配置的默认的处理器映射器，处理器适配器，处理器异常解析器）。
+		相当于配置了：
+		// HandlerMapping
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"></bean>
+		<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"></bean>
+		// HandlerAdapter
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"></bean>
+		<bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"></bean>
+		<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"></bean>
+		// HandlerExceptionResolvers
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver"></bean>
+		<bean class="org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver"></bean>
+		<bean class="org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver"></bean>
+
+		作用：方便我们自定义的处理器映射器，处理器适配器，处理器异常解析器，与DispatcherServlet.properties文件中配置的默认的处理器映射器，处理器适配器，处理器异常解析器都同时存在！
+
+		例如：如果不定义该标签，那么我们在下面配置"自定义的处理器异常解析器"，将只会获取到我们"自定义的处理器异常解析器"，而不会去获取DispatcherServlet.properties文件中配置的处理器异常解析器！
+		如果想要我们"自定义的处理器异常解析器"和DispatcherServlet.properties文件中配置的处理器异常解析器，同时存在，则需要配置上默认的处理器异常解析器，而<mvc:annotation-driven/>可以简化我们的配置。
+
+	-->
+	<mvc:annotation-driven/>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+	<!--	自定义的处理器异常解析器	-->
+<!--	<bean class="com.springstudymvc.msb.mvc_10.MyExceptionHandlerExceptionResolver">-->
+<!--		<property name="order" value="-1"/>-->
+<!--	</bean>-->
+
+
+</beans>
