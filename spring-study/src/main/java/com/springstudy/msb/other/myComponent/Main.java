@@ -19,6 +19,7 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(ScanConfig.class);
+		System.out.println(ac.getBean(User.class));
 	}
 
 }
