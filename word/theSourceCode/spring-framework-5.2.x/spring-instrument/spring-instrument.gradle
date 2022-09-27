@@ -1,0 +1,19 @@
+description = "Spring Instrument"
+
+jar {
+	manifest.attributes["Premain-Class"] =
+			"org.springframework.instrument.InstrumentationSavingAgent"
+	manifest.attributes["Agent-Class"] =
+			"org.springframework.instrument.InstrumentationSavingAgent"
+	manifest.attributes["Can-Redefine-Classes"] = "true"
+	manifest.attributes["Can-Retransform-Classes"] = "true"
+	manifest.attributes["Can-Set-Native-Method-Prefix"] = "false"
+}
+
+
+/**
+ *
+ *
+ * 当前模块的作用：spring-instrument模块：用于类加载时修改字节码
+ *
+ */

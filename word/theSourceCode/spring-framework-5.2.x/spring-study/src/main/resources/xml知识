@@ -1,0 +1,4 @@
+XML命名空间详解：https://blog.csdn.net/zisgood/article/details/98942674
+
+xsi:schemaLocation：这个标签的作用是引用xsd文件来校验自己的格式，其引用值是一对url，用空格分开。
+    比如文首例子中xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"，空格前是xsd文件的目标命名空间(targetNamespace)，空格后是xsd文件所在的位置

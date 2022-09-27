@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       https://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/cache
+       http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<context:component-scan base-package="com.springstudy.msb.s_27">
+<!--		<context:include-filter type="annotation" expression="com.springstudy.msb.s_27.tx_xml.MyComponent"/>-->
+	</context:component-scan>
+
+	<!--	1、引入外部的属性文件	-->
+	<!--	方式一	-->
+	<context:property-placeholder location="classpath:msb/spring-27-tx-dbconfig.properties"/>
+	<!--	方式二	-->
+	<!--	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+	<!--		<property name="location" value="classpath:spring-27-tx-dbconfig.properties"/>-->
+	<!--	</bean>-->
+
+	<!-- 	2、配置数据源（我们这用的是Spring内置的数据源）	 -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClass}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+	<!-- 3、配置一个数据库的操作模板:JdbcTemplate，用于基本的增删改查工具类 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!--	4、配置事务管理器	-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 注入 DataSource -->
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!--	5、配置事务独特的advice	-->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<!--	5.1、配置事务的属性	-->
+		<tx:attributes>
+			<!--	5.2、配置哪些方法要采用事务		-->
+			<!--
+			指定方法名称:是业务核心方法
+			read-only:是否是只读事务。默认 false，不只读。
+			isolation:指定事务的隔离级别。默认值是使用数据库的默认隔离级别。
+			propagation:指定事务的传播行为。
+			timeout:指定超时时间。默认值为:-1。永不超时。
+			rollback-for:用于指定一 个异常，当 执行产生该 异常时，事 务回滚。产 生其他异常 ，事务不回 滚。没有默认值，任何异常都回滚。
+			no-rollback-for:用于指定一个异常，当产生该异常时，事务不回滚，产生其他异常时，事务回滚。没有默认值，任何异常都回滚。
+			-->
+			<tx:method name="updateBalanceInService" propagation="REQUIRED"/>
+			<tx:method name="updateBalanceInDao" propagation="REQUIRED"/>
+			<tx:method name="updateName" propagation="REQUIRES_NEW" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 6、配置事务切入的aop -->
+	<aop:config>
+		<!-- 6.1、配置切入点表达式 -->
+		<!--
+
+		1、注意：.和..的区别：.代表当前包，..代表当前包及其所有子包
+
+		如果是配置execution(* com.springstudy.msb.s_27.tx_xml.*.*(..))，那么则不会进行动态代理bookService，
+		因为在AbstractAutoProxyCreator#wrapIfNecessary()中获取不到能够增强bookService方法的Advisor bean，所以就不会进行动态代理，
+		原因就是我们配置的是.*，而不是..*；.*的话它只会匹配tx_xml包下的类，而不会匹配子包下的类
+
+		2、注意：决定一个类是否被代理的，是切入点表达式，而不是<tx:method>决定！！！！
+		<tx:method>的作用是在TransactionInterceptor中获取TransactionAttribute用的，如果如果类中的方法没被配置在<tx:method>中，则获取的属性值为null！
+		例如这里com.springstudy.msb.s_27.tx_xml包下的所有对象，只要有方法，都会被代理，即使类中的方法在<tx:method>当中没有配置，只不过在TransactionInterceptor中获取TransactionAttribute为null
+
+		-->
+		<aop:pointcut id="txPoint" expression="execution(* com.springstudy.msb.s_27.tx_xml..*.*(..))"/>
+		<!-- 6.2、配置事务通知和切入点表达式的关系	-->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+	</aop:config>
+
+
+	<bean class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="transactionManager" ref="transactionManager"/>
+	</bean>
+
+	<!--	7、配置bean	-->
+	<bean id="bookService" class="com.springstudy.msb.s_27.tx_xml.service.BookServiceImpl">
+		<property name="bookDao" ref="bookDao"/>
+		<property name="userService" ref="userService"/>
+	</bean>
+
+	<bean id="bookDao" class="com.springstudy.msb.s_27.tx_xml.dao.BookDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+
+	<bean id="userService" class="com.springstudy.msb.s_27.tx_xml.service.UserServiceImpl">
+	</bean>
+
+	<bean id="accountService" class="com.springstudy.msb.s_27.tx_xml.service.AccountServiceImpl">
+	</bean>
+
+	<bean id="boBo" class="com.springstudy.msb.s_27.tx_xml.BoBo"/>
+
+	<!-- 开启 spring 对注解事务的支持 -->
+	<!--	<tx:annotation-driven transaction-manager="transactionManager"/>	-->
+
+</beans>

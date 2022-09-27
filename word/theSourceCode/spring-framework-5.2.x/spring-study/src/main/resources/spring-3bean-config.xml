@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+   >
+
+	<!--  实例化bean的三种方式 -->
+	<!--  构造方法   -->
+	<!--  静态方法	-->
+	<!--  普通方法	-->
+
+	<!--  构造方法   -->
+	<bean id="bean3_One" class="com.springstudy.Initializethebean.obj.Bean3_One"/>
+
+	<!--  静态方法	-->
+	<bean id="templateInfo" class="com.springstudy.Initializethebean.obj.Bean3_One" factory-method="templateInfo"/>
+
+	<!--  普通方法	-->
+	<bean id="componentInfo" factory-bean="bean3_One" factory-method="componentInfo"/>
+
+</beans>

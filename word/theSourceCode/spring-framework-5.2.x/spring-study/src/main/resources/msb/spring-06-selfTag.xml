@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:msb="http://www.mashibing.com/schema/user"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	    http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+		http://www.mashibing.com/schema/user http://www.mashibing.com/schema/user.xsd">
+
+	<!--
+
+	1、xmlns:msb="http://www.mashibing.com/schema/user" 必须和【user.xsd】中的【targetNamespace】对应
+
+	2、⚠️xsi:schemaLocation：这个标签的作用是引用xsd文件来校验自己的格式，其引用值是一对url，用空格分开。
+	>>> 空格前是xsd文件的目标命名空间(targetNamespace)，空格后是xsd文件所在的网络位置
+
+	-->
+
+	<!--	<context:component-scan base-package="com.springstudy.msb.s_06"/>		-->
+
+	<context:component-scan base-package="com.springstudy.msb.s_06"/>
+
+	<msb:user id="haha" username="zhangsan" email="183qq.com" password="123456"/>
+
+</beans>

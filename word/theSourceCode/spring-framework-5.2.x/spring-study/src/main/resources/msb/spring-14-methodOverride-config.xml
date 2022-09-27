@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<!--	单例		-->
+	<bean id="apple" class="com.springstudy.msb.s_14.lookup.Apple"/>
+
+	<!--	原型		-->
+	<bean id="banana" class="com.springstudy.msb.s_14.lookup.Banana" scope="prototype"/>
+
+	<!--	单例引入单例	-->
+	<!--	单例引入单例，加了<lookup-method>获取到的依旧是单例	-->
+	<bean id="fruitPlate1" class="com.springstudy.msb.s_14.lookup.FruitPlate">
+		<lookup-method name="getFruit" bean="apple"/>
+	</bean>
+
+	<!--	单例引入原型	-->
+	<!--	单例引入原型，加了<lookup-method>获取到的是原型，不加<lookup-method>获取到的就是单例	-->
+	<bean id="fruitPlate2" class="com.springstudy.msb.s_14.lookup.FruitPlate">
+		<lookup-method name="getFruit" bean="banana"/>
+	</bean>
+
+</beans>

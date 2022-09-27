@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<bean id="customer" class="com.springstudy.msb.s_07.selfEditor.Customer">
+		<property name="name" value="张三"></property>
+		<property name="address" value="河北省_邯郸市_武安市"></property>
+	</bean>
+
+	<!--
+
+	⚠️bean class="" 的意思也是代表向spring容器当中注册CustomEditorConfigurer这个bean，
+
+	如果不注册CustomEditorConfigurer的话， 那么spring当中是没有CustomEditorConfigurer的！
+
+	可在PostProcessorRegistrationDelegate#invokeBeanFactoryPostProcessors()，约237行的orderedPostProcessorNames作为检验；
+
+	如果注册，那么orderedPostProcessorNames当中才会有CustomEditorConfigurer，否则没有
+
+	-->
+
+	<!--	方式一：添加属性编辑器的注册器	-->
+	<!--	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">-->
+	<!--		<property name="propertyEditorRegistrars">-->
+	<!--			<list>-->
+	<!--				<bean class="com.springstudy.msb.s_07.selfEditor.AddressPropertyEditorRegistrar"></bean>-->
+	<!--			</list>-->
+	<!--		</property>-->
+	<!--	</bean>-->
+
+	<!--	方式二：直接添加属性编辑器	-->
+	<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+		<property name="customEditors">
+			<map>
+				<entry key="com.springstudy.msb.s_07.selfEditor.Address">
+					<value>com.springstudy.msb.s_07.selfEditor.AddressPropertyEditor</value>
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+</beans>

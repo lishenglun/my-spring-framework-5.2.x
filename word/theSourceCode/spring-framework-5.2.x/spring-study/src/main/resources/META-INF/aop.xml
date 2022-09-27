@@ -1,0 +1,16 @@
+<!DOCTYPE aspectj PUBLIC "-//AspectJ//DTD//EN" "http://www.eclipse.org/aspectj/dtd/aspectj.dtd">
+<aspectj>
+
+	<!--	️该配置文件的内容：⚠️主要是告诉AspectJ需要对哪个包进行织入，并使用哪些增强器	-->
+
+	<weaver>
+		<!--	1、对哪个包进行织入	-->
+		<include within="com.springstudy.book2.chapter7_aop.LTW.*"/>
+	</weaver>
+
+	<aspects>
+		<!--	2、使用哪些增强(使用哪个切面进行编织)	-->
+		<aspect name="com.springstudy.book2.chapter7_aop.LTW.AspectJTest"/>
+	</aspects>
+
+</aspectj>

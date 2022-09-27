@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/aop
+	   http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<bean id="a" class="com.springstudy.msb.s_20.cycle.A">
+		<property name="b" ref="b"></property>
+	</bean>
+
+	<bean id="b" class="com.springstudy.msb.s_20.cycle.B">
+		<property name="a" ref="a"></property>
+	</bean>
+
+<!--	准备aop执行过程中需要的东西，准备好之后，就可以进行一个动态代理操作	-->
+
+	<!--	通知类（通知器，advisor）	-->
+	<bean id="logger" class="com.springstudy.msb.s_20.cycle.Logger"/>
+
+	<!--	切面（aspect）：切入点和通知的结合		-->
+	<aop:config>
+		<!--	ref：引用配置好的通知类（advisor）bean的id		-->
+		<!--	引入通知类，通知类里面的通知对哪些切入点进行切入	-->
+		<aop:aspect id="logger" ref="logger">
+			<!--	切入点（pointcut）		-->
+			<aop:pointcut expression="execution(* com.springstudy.msb.s_20.cycle.*.*(..))" id="method"/>
+			<!--	通知类型（advice）		-->
+			<aop:before method="recordBefore" pointcut-ref="method" />
+			<!--	通知类型（advice）		-->
+			<aop:after method="recordAfter" pointcut-ref="method"/>
+		</aop:aspect>
+	</aop:config>
+
+</beans>

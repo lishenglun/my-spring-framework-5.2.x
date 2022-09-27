@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
+	   http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<context:property-placeholder location="classpath:book2/chapter10_tx/spring-tx-dbconfig.properties"/>
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClass}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+
+	<!--	4、配置事务管理器	-->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 注入 DataSource -->
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="userService" class="com.springstudy.book2.chapter10_tx.UserServiceImpl">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!-- 开启spring对注解事务的支持（@EnableTransactionManagement） -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+</beans>
+
