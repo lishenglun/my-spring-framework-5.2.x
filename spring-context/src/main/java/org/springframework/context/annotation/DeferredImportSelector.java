@@ -73,6 +73,7 @@ public interface DeferredImportSelector extends ImportSelector {
 		 *
 		 * @param metadata						直接标注@Import的类的注解元数据
 		 * @param selector						DeferredImportSelector
+		 *                                      注意：⚠️这里可以决定是否执行DeferredImportSelector#selectImports()，参考：{@link org.springframework.context.annotation.ConfigurationClassParser.DefaultDeferredImportSelectorGroup#process}
 		 */
 		void process(AnnotationMetadata metadata, DeferredImportSelector selector);
 
