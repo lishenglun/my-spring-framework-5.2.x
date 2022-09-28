@@ -141,17 +141,20 @@ public class AnnotatedBeanDefinitionReader {
 	 */
 	public void register(Class<?>... componentClasses) {
 		for (Class<?> componentClass : componentClasses) {
+			// 注册bd
 			registerBean(componentClass);
 		}
 	}
 
 	/**
+	 * 注册bd
+	 *
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
 	 * @param beanClass the class of the bean
 	 */
 	public void registerBean(Class<?> beanClass) {
-		// 注册beanClass对应的bd，注意是bd，而不是bean！
+		// 注册bd
 		doRegisterBean(beanClass, null, null, null, null);
 	}
 
@@ -242,6 +245,8 @@ public class AnnotatedBeanDefinitionReader {
 	}
 
 	/**
+	 * 注册bd
+	 *
 	 * Register a bean from the given bean class, deriving its metadata from
 	 * class-declared annotations.
 	 * @param beanClass the class of the bean
@@ -258,8 +263,7 @@ public class AnnotatedBeanDefinitionReader {
 			@Nullable Class<? extends Annotation>[] qualifiers, @Nullable Supplier<T> supplier,
 			@Nullable BeanDefinitionCustomizer[] customizers) {
 
-		// AnnotatedGenericBeanDefinition implements AnnotatedBeanDefinition
-		//		间接实现了BeanDefinition
+		// AnnotatedGenericBeanDefinition implements AnnotatedBeanDefinition，间接实现了BeanDefinition
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
@@ -294,9 +298,7 @@ public class AnnotatedBeanDefinitionReader {
 		BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(abd, beanName);
 		// applyScopedProxyMode：应用作用域代理模式
 		definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
-		/**
-		 * 🎈把一个bean注入到beanDefinitionMap中
-		 */
+		// 注册bd
 		BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, this.registry);
 	}
 

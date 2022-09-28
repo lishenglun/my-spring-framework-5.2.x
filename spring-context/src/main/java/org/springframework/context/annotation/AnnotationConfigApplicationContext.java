@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.support.GenericApplicationContext;
@@ -65,29 +66,28 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	public AnnotationConfigApplicationContext() {
 		/*
 
-		1、去查看父类构造方法
+		1、去查看父类构造方法，创建了beanFactory = DefaultListableBeanFactory
 
 		调用了父类GenericApplicationContext的构造方法，在里面，创建了创建了beanFactory【this.beanFactory = new DefaultListableBeanFactory()】
 
 		*/
 
 
-		/* 2、创建一个"注解bd读取器" */
+		/* 2、创建一个AnnotatedBeanDefinitionReader("注解bd读取器") */
 
 		/**
-		 * 初始化一个「注解BeanDefinition读取器」，往DefaultListableBeanFactory中的beanDefinitionMap注册了五个bean
-		 *
-		 * ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProcessor
-		 * EventListenerMethodProcessor implements BeanFactoryPostProcessor
-		 *
-		 * AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor
-		 * CommonAnnotationBeanPostProcessor implements BeanPostProcessor
-		 *
-		 * DefaultEventListenerFactory(默认事件监听器工) implements EventListenerFactory
+		 * 1、在new AnnotatedBeanDefinitionReader()构造方法里面，
+		 * 调用了{@link AnnotationConfigUtils#registerAnnotationConfigProcessors(BeanDefinitionRegistry)}
+		 * 往DefaultListableBeanFactory中的beanDefinitionMap注册了五个bean：
+		 * （1）ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor extends BeanFactoryPostProcessor
+		 * （2）EventListenerMethodProcessor implements BeanFactoryPostProcessor
+		 * （3）AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor
+		 * （4）CommonAnnotationBeanPostProcessor implements BeanPostProcessor
+		 * （5）DefaultEventListenerFactory(默认事件监听器工) implements EventListenerFactory
 		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 
-		/* 3、创建一个"类路径bd扫描器"：能够扫描一个类，并转换成bd */
+		/* 3、创建一个ClassPathBeanDefinitionScanner("类路径bd扫描器")：能够扫描一个类，并转换成bd */
 
 		/**
 		 * 能够扫描一个类，并转换成BeanDefinition
@@ -115,10 +115,15 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * @param componentClasses one or more component classes &mdash; for example,
 	 * {@link Configuration @Configuration} classes
 	 */
-	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+	public AnnotationConfigApplicationContext(Class<?>... componentClasses/* 组件类 */) {
+		// 里面创建了beanFactory
 		this();
-		/* register()：注册了配置类 */
+
+		// 注册bd
+		// 注意：里面并不会去判断componentClasses上是否携带了@Configuration，也就是说，即使没有携带@Configuration也是可以注册的，这个平常的注册bd没有什么区别！
 		register(componentClasses);
+
+		// 刷新容器
 		refresh();
 	}
 

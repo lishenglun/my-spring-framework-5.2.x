@@ -22,6 +22,7 @@ import org.springframework.lang.Nullable;
 import java.util.function.Predicate;
 
 /**
+ * ImportSelector被设计成和@Import同样的效果，但是实现了ImportSelector的类可以根据条件，决定导入哪些配置，比@Import更加灵活和动态。
  *
  * 此接口是spring中导入外部配置的核心接口，根据给定的条件（通常是一个或多个注解）判断要导入哪个配置类
  * 如果该接口的实现类同时实现了一些Aware接口，那么在调用selectImports()之前先调用上述接口中的回调方法，

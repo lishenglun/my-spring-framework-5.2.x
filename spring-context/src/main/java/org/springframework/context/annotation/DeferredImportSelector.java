@@ -20,6 +20,11 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 
 /**
+ * 继承ImportSelector，
+ * 1、和ImportSelector的效果一样；
+ * 2、并增加了分组概念；
+ * 3、最重要的是：所有其它的的配置类都已经处理完了，再处理所有的DeferredImportSelector。有的时候，需求是，等所有配置类都加载完了，再从容器中取到某个东西做相关的处理，决定是否导入一些类。
+ *
  * A variation of {@link ImportSelector} that runs after all {@code @Configuration} beans
  * have been processed. This type of selector can be particularly useful when the selected
  * imports are {@code @Conditional}.
@@ -65,6 +70,9 @@ public interface DeferredImportSelector extends ImportSelector {
 		 * class using the specified {@link DeferredImportSelector}.
 		 *
 		 * 使用指定的 {@link DeferredImportSelector} 处理导入 @{@link Configuration} 类的 {@link AnnotationMetadata}。
+		 *
+		 * @param metadata						直接标注@Import的类的注解元数据
+		 * @param selector						DeferredImportSelector
 		 */
 		void process(AnnotationMetadata metadata, DeferredImportSelector selector);
 
@@ -82,10 +90,12 @@ public interface DeferredImportSelector extends ImportSelector {
 		 */
 		class Entry {
 
-			// metadata：标注@Import()注解的配置类的注解元数据
+			// 标注@Import的类的注解元数据
 			private final AnnotationMetadata metadata;
 
-			// selector.selectImports(metadata)方法获取到的导入的类全限定名称
+			// 要导入的全限定类名
+			// 如果不Group为null，那么就是自己Group自定义的
+			// 如果Group为null，那么就是DeferredImportSelector#selectImports()中的内容
 			private final String importClassName;
 
 			public Entry(AnnotationMetadata metadata, String importClassName) {

@@ -237,7 +237,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @Component
 	 * @ComponentScan
 	 * @ComponentScans
-	 *
 	 */
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
@@ -249,11 +248,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			throw new IllegalStateException(
 					"postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
 		}
+
 		if (this.factoriesPostProcessed.contains(registryId)) {
 			// 如果包含就代表，我已经处理过了，抛出对应的异常
 			throw new IllegalStateException(
 					"postProcessBeanFactory already called on this post-processor against " + registry);
 		}
+
 		// ⚠️加入到已经处理过的PostProcessor集合里面去
 		// 将马上要进行处理的registry对象的id值放到已经处理的集合对象中，这样下次就可以判断是否被执行过，以达到防止重复执行的目的！
 		this.registriesPostProcessed.add(registryId);
@@ -303,6 +304,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * @Import
 	 * @ImportResource
 	 * @Bean
+	 *
 	 * （1）如果包含@Configuration，同时包含proxyBeanMethods属性，那么设置BeanDefinition的configurationClass属性为full
 	 * （2）如果包含@Component、@ComponentScan、@Import、@ImportSource、@Bean中的某一个，就往BD里面设置属性值了，将configurationClass属性设置为lite
 	 *
