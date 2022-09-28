@@ -56,6 +56,11 @@ public class MyDeferredImportSelectorHolder implements DeferredImportSelector {
 		public void process(AnnotationMetadata metadata, DeferredImportSelector selector) {
 			System.out.println("MyGroup——————————>process()");
 
+			/**
+			 * 注意：⚠️这里可以决定是否执行DeferredImportSelector#selectImports()，
+			 * 参考：{@link org.springframework.context.annotation.ConfigurationClassParser.DefaultDeferredImportSelectorGroup#process}
+			 */
+
 			this.metadata = metadata;
 		}
 
