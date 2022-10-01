@@ -19,6 +19,15 @@ package org.springframework.context;
 import java.util.EventListener;
 
 /**
+ * 应用监听器
+ *
+ * 注意：ApplicationListener extends EventListener，EventListener是java里面的接口
+ *
+ * 题外：⚠️发布一个事件，只有监听该事件的监听器会被触发
+ *
+ * 题外：⚠️一个监听器可以监听1个事件，也可以监听多个事件，无论监听的是几个事件，接收事件的方法都是ApplicationListener#onApplicationEvent()一个方法。
+ * 如果监听多个事件，方法里面，可以根据不同的事件类型，执行不同的处理逻辑，这样就实现了一个监听器处理多个事件！
+ *
  * Interface to be implemented by application event listeners.
  *
  * <p>Based on the standard {@code java.util.EventListener} interface

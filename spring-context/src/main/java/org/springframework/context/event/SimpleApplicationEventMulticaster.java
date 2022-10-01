@@ -127,7 +127,13 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	}
 
 	/**
-	 * 广播事件
+	 * 广播事件到"监听当前事件的监听器"里面去
+	 *
+	 * 题外：发布一个事件，只有监听该事件的监听器会被触发
+	 *
+	 * 题外：一个监听器可以监听1个事件，也可以监听多个事件，无论监听的是几个事件，接收事件的方法都是ApplicationListener#onApplicationEvent()一个方法。
+	 * 如果监听多个事件，方法里面，可以根据不同的事件类型，执行不同的处理逻辑，这样就实现了一个监听器处理多个事件！
+	 *
 	 * @param event the event to multicast
 	 * @param eventType the type of event (can be {@code null})
 	 */
@@ -139,16 +145,19 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		// 获取此多播器的当前任务线程池
 		Executor executor = getTaskExecutor()/* 获取任务执行器 */;
 		/**
-		 * 1、getApplicationListeners()：返回与"给定事件类型"相匹配的"应用监听器"集合
-		 * 2、没有对应的监听器，发布的事件就无人执行！
+		 * 1、getApplicationListeners()：获取监听当前事件类型的监听器
+		 *
+		 * 2、注意：⚠️没有对应的监听器，发布的事件就无人执行！
 		 */
-		// 遍历所有的监听器
-		for (ApplicationListener<?> listener : getApplicationListeners(event, type)/* 获取监听器 */) {
+		// 遍历监听当前事件类型的监听器，进行处理事件
+		for (ApplicationListener<?> listener : getApplicationListeners(event, type)/* 获取监听当前事件类型的监听器 */) {
+			/* 多线程执行 */
 			if (executor != null) {
 				// 如果executor不为空，则使用executor调用监听器
 				// >>> 内部其实是：调用listener的onApplicationEvent方法，传入event
 				executor.execute(() -> invokeListener(listener, event));
 			}
+			/* 单线程执行 */
 			else {
 				// ⚠️
 				// 否则直接调用监听器

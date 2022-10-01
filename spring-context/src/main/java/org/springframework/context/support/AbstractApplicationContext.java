@@ -212,8 +212,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private MessageSource messageSource;
 
 	/**
-	 * Helper class used in event publishing.
+	 * Helper class used in event publishing. —— 事件发布中使用的助手类
 	 */
+	// 广播器
+	// 在容器中没有自定义的广播器时，spring默认使用的广播器是SimpleApplicationEventMulticaster
 	@Nullable
 	private ApplicationEventMulticaster applicationEventMulticaster;
 
@@ -1181,7 +1183,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	protected void initApplicationEventMulticaster() {
 		// 获取当前bean工厂, 一般是DefaultListableBeanFactory
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		/* 1、先判断容器中是否已经有自定义的多播器 */
+		/* 1、先判断容器中是否已经有自定义的广播器 */
 		// 判断容器中是否存在bdName为applicationEventMulticaster的bd,也就是说自定义的事件监听多路广播器，必须实现ApplicationEventMulticaster接口
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME /* applicationEventMulticaster */)) {
 
@@ -1191,11 +1193,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				logger.trace("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
 			}
 		}
-		/* 2、如果容器中没有自定义的多播器，那么就使用spring就默认提供的多播器（创建一个spring提供的默认多播器，然后放入一级缓存中） */
+		/* 2、如果容器中没有自定义的广播器，那么就创建使用spring默认提供的广播器(SimpleApplicationEventMulticaster)，然后放入一级缓存中 */
 		else {
-			// 创建spring默认的多播器
+			// 创建spring默认的广播器
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
-			// 注册多播器到一级缓存中
+			// 注册广播器到一级缓存中
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME/* applicationEventMulticaster */, this.applicationEventMulticaster);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " +

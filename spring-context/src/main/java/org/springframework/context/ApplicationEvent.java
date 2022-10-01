@@ -19,6 +19,10 @@ package org.springframework.context;
 import java.util.EventObject;
 
 /**
+ * 应用事件
+ *
+ * 题外：如果我们自定义一个事件类型，自定义的事件类型，它就是一个标志，所以里面可以不用去写特定的逻辑
+ *
  * Class to be extended by all application events. Abstract as it
  * doesn't make sense for generic events to be published directly.
  *
@@ -27,7 +31,7 @@ import java.util.EventObject;
  * @see org.springframework.context.ApplicationListener
  * @see org.springframework.context.event.EventListener
  */
-public abstract class ApplicationEvent extends EventObject {
+public abstract class ApplicationEvent/* 应用事件 */ extends EventObject {
 
 	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = 7099057708183571937L;

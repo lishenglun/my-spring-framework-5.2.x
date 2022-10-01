@@ -16,28 +16,16 @@
 
 package org.springframework.core.io.support;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.util.*;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 /**
  * General purpose factory loading mechanism for internal use within the framework.
@@ -123,33 +111,44 @@ public final class SpringFactoriesLoader {
 	}
 
 	private static Map<String, List<String>> loadSpringFactories(@Nullable ClassLoader classLoader) {
+		// 尝试从缓存中获取
 		MultiValueMap<String, String> result = cache.get(classLoader);
 		if (result != null) {
 			return result;
 		}
 
+		/* 把所有`spring.factories`文件中的所有信息都加载到了内存中 */
+
 		try {
+			// 加载所有的spring.factories文件
 			Enumeration<URL> urls = (classLoader != null ?
-					classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
-					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
+					classLoader.getResources(FACTORIES_RESOURCE_LOCATION/* META-INF/spring.factories */) :
+					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION/* META-INF/spring.factories */));
+			// 存储加载的信息
 			result = new LinkedMultiValueMap<>();
+
+			// 遍历每个文件
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				UrlResource resource = new UrlResource(url);
+				// 加载单个spring.factories文件中的所有的属性
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
+				// 遍历每一个key对应的属性值
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
 					String factoryTypeName = ((String) entry.getKey()).trim();
 					for (String factoryImplementationName : StringUtils.commaDelimitedListToStringArray((String) entry.getValue())) {
+						// key和属性值对应的保存在了result对象中
 						result.add(factoryTypeName, factoryImplementationName.trim());
 					}
 				}
 			}
+			// 放入缓存中（也就是内存中）
 			cache.put(classLoader, result);
 			return result;
 		}
 		catch (IOException ex) {
 			throw new IllegalArgumentException("Unable to load factories from location [" +
-					FACTORIES_RESOURCE_LOCATION + "]", ex);
+					FACTORIES_RESOURCE_LOCATION/* META-INF/spring.factories */ + "]", ex);
 		}
 	}
 

@@ -430,8 +430,10 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * 确定是否存在{@code className}对应的 {@link Class}并且可以加载。
-	 * 如果该类或者该类的依赖项不存在或者无法加载时，返回false
+	 * 判断当前项目下，是否存在一个"全限定类名"对应的Class对象，具体做法是：
+	 * 通过反射的方式获取"全限定类名"对应的Class对象，如果存在就返回true，否则返回false
+	 *
+	 * 确定是否存在className对应的Class，并且可以加载，如果该类或者该类的依赖项不存在或者无法加载时，返回false
 	 *
 	 * Determine whether the {@link Class} identified by the supplied name is present
 	 * and can be loaded. Will return {@code false} if either the class or
@@ -448,8 +450,11 @@ public abstract class ClassUtils {
 	 */
 	public static boolean isPresent(String className, @Nullable ClassLoader classLoader) {
 		try {
+			// 根据类名加载类对象
 			// 使用classLoader加载className对应的Class对象
 			forName(className, classLoader);
+
+			// 存在就返回true
 			return true;
 		}
 		catch (IllegalAccessError err) {
@@ -458,6 +463,8 @@ public abstract class ClassUtils {
 		}
 		catch (Throwable ex) {
 			// Typically ClassNotFoundException or NoClassDefFoundError...
+
+			// 报错了，说明不存在，则返回false
 			return false;
 		}
 	}

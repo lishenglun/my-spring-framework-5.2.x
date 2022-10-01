@@ -25,6 +25,8 @@ import org.springframework.lang.Nullable;
  * 2、并增加了分组概念；
  * 3、最重要的是：所有其它的的配置类都已经处理完了，再处理所有的DeferredImportSelector。有的时候，需求是，等所有配置类都加载完了，再从容器中取到某个东西做相关的处理，决定是否导入一些类。
  *
+ * 题外：ImportSelector与DeferredImportSelector的区别：就是selectImports方法执行时机有差别。这个差别期间，spring容器对此配置类做了些其他的逻辑：包括对@ImportResource、@Bean这些注解的处理。
+ *
  * A variation of {@link ImportSelector} that runs after all {@code @Configuration} beans
  * have been processed. This type of selector can be particularly useful when the selected
  * imports are {@code @Conditional}.
