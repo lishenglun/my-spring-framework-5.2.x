@@ -28,6 +28,10 @@ import java.net.URL;
 import java.util.*;
 
 /**
+ * SpringFactoriesLoader：一个工具类，作用是从classpath/META-INF/spring.factories文件中，根据key来加载对应的类到spring IoC容器中
+ *
+ * 题外：它其实和java中的SPI机制的原理是一样的，不过它比SPI更好的点，在于不会一次性加载所有的类，而是根据key进行加载。
+ *
  * General purpose factory loading mechanism for internal use within the framework.
  *
  * <p>{@code SpringFactoriesLoader} {@linkplain #loadFactories loads} and instantiates
