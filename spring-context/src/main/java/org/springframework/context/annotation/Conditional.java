@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 条件注解
+ * 条件注解，结合条件接口一起使用
  *
  * Indicates that a component is only eligible for registration when all
  * {@linkplain #value specified conditions} match.

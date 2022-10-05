@@ -20,7 +20,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- * 条件
+ * 条件接口，结合@Conditional注解一起使用
  *
  * 一般用于：根据条件判断是否解析配置类；是否注入bean到容器中
  *
