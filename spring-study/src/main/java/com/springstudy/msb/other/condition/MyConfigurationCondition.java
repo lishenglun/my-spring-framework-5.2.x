@@ -1,10 +1,8 @@
 package com.springstudy.msb.other.condition;
 
-import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.ConfigurationCondition;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.core.type.MethodMetadata;
 
 /**
  * @author lishenglun
@@ -12,11 +10,17 @@ import org.springframework.core.type.MethodMetadata;
  * @description TODO
  * @date 2022/10/5 17:33
  */
-public class MyCondition2 implements Condition {
+public class MyConfigurationCondition implements ConfigurationCondition {
+
 
 	@Override
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		return false;
+	}
+
+	@Override
+	public ConfigurationPhase getConfigurationPhase() {
+		return ConfigurationPhase.PARSE_CONFIGURATION;
 	}
 
 }

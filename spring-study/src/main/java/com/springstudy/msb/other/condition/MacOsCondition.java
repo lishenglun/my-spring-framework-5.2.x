@@ -19,6 +19,9 @@ public class MacOsCondition implements Condition {
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 		String osName = context.getEnvironment().getProperty("os.name");
 		return StringUtils.equalsIgnoreCase(osName, "Mac OS X");
+		// 如果修改为返回false，则会报错：
+		// No qualifying bean of type 'com.springstudy.msb.other.condition.User' available
+		//return false;
 	}
 
 }

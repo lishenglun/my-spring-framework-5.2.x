@@ -13,6 +13,8 @@ public class ConditionMain {
 
 	public static void main(String[] args) {
 		ApplicationContext ac = new AnnotationConfigApplicationContext(ConditionConfiguration.class);
+		User user = ac.getBean(User.class);
+		System.out.println(user);
 	}
 
 }
