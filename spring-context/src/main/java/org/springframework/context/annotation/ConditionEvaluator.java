@@ -16,10 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -38,6 +34,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Predicate;
+
 /**
  * Internal class used to evaluate {@link Conditional} annotations.
  *
@@ -48,7 +49,6 @@ import org.springframework.util.MultiValueMap;
 class ConditionEvaluator {
 
 	private final ConditionContextImpl context;
-
 
 	/**
 	 * Create a new {@link ConditionEvaluator} instance.
@@ -72,21 +72,26 @@ class ConditionEvaluator {
 	}
 
 	/**
+	 * 1、根据{@link Conditional}注解中的条件对象，判定是否应该跳过(忽略)当前项（配置类/bd）：
 	 *
-	 * 根据 {@code @Conditional} 注解，确定是否应跳过某个项目。
+	 * （1）true：跳过。如果当前是个配置类，则代表，不再解析当前配置类了！
+	 * 只有有一个@Conditional中的条件对象#matches()返回false，就代表不匹配，则跳过当前项
 	 *
-	 * Determine if an item should be skipped based on {@code @Conditional} annotations.
+	 * （2）false：不跳过。如果当前是个配置类，则代表，会往下解析当前配置类！
+	 * 不存在@Conditional，或者@Conditional中的所有条件对象#matches()都返回true，都匹配，才不跳过当前项
+	 *
+	 * 注意：⚠️当前方法，一般用于2个场景判断：1、不解析配置类，以及由于不解析配置类而导致的不注入配置类到IOC容器中；2、阻断bean注入Spring容器
+	 * 注意：⚠️解析完配置类之后，是会把配置类注入到IOC容器中的；如果跳过，不解析某个配置类，那么该配置类也不会注入到IOC容器中！
+	 *
+	 * Determine if an item should be skipped based on {@code @Conditional} annotations. —— 根据 {@code @Conditional} 注解，确定是否应跳过某个项目
+	 *
 	 * @param metadata the meta data
 	 * @param phase the phase of the call
 	 * @return if the item should be skipped
-	 *
-	 * 🚩️true：跳过！什么都不做，也就是不会进行解析
-	 * 🚩false：不跳过！会进行解析
-	 *
 	 */
-	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata, @Nullable ConfigurationPhase phase) {
+	public boolean shouldSkip(@Nullable AnnotatedTypeMetadata metadata/* 配置类的注解元数据 */, @Nullable ConfigurationPhase phase) {
 
-		/* 1、不存在@Conditional，就直接不跳过 */
+		/* 1、配置类上不存在注解；或者是存在注解，但是不存在@Conditional，就直接不跳过当前配置类（不跳过当前配置类，意味着要解析当前配置类） */
 
 		if (metadata == null || !metadata.isAnnotated(Conditional.class.getName())) {
 			// 元数据为空，或者元数据不为空，且配置类中"不存在@Conditional"，则返回false
@@ -94,44 +99,62 @@ class ConditionEvaluator {
 			return false;
 		}
 
+		/* 2、存在@Conditional */
+
 		/*
 
-		2、存在@Conditional，就获取@Conditional上面的value属性值，是一个数组，也就是条件类数组；
-		然后遍历条件类数组，获取每一个类的全限定类名，通过全限定类名获取对应的Class对象，然后通过Class对象创建对应的条件类实例；
-		最后调用条件类实例的matches()方法，进行判断，是否跳过（由于会取反，所以matches()返回true代表匹配，所以不跳过；返回false代表不匹配，所以跳过）
+		2.1、当前配置阶段为null的话，就评估当前@Conditional的配置阶段(作用阶段)。例如是配置在@Configuration类上，那么就是解析配置阶段，否则其它的话，则是注册bean阶段。
+		（1）
+		（2）
 
 		*/
 
-		// 采用递归的方式进行判断，第一次执行的时候phase为空，向下执行
-		if (phase == null/* phase值，第一次都等于空 */) {
-			// 1、判断metadata是否是AnnotationMetadata类的一个实例
-			// 2、ConfigurationClassUtils.isConfigurationCandidate()，主要逻辑如下：
-			// >>> 1、检查bean是不是一个接口，如果是，返回false
-			// >>> 2、检查bean中是否包含@Component、@ComponentScan、@Import、@ImportResource中的任意一个
-			// >>> 3、检查bean中是否有@Bean
-			// 只要满足其中1,2或者1,3或者1,4或者1,5，就会继续递归
+		/**
+		 * 1、如果是{@link ConfigurationClassParser#processConfigurationClass(ConfigurationClass, Predicate)}进来的话，
+		 * 那么 phase = ConfigurationPhase.PARSE_CONFIGURATION，代表当前是解析配置类
+		 */
+		if (phase == null) {
+			/*
+
+			(1)如果当前@@Conditional修饰的类中修饰了@Component、@ComponentScan、@Import、@ImportResource、@Bean中的任一个注解，就代表是配置类，
+			就将当前的配置阶段设置为"解析配置阶段"，然后进行递归，带着明确的配置阶段，重新判断是否应该跳过当前项
+
+			*/
+			// 判断metadata是否是AnnotationMetadata实例，是AnnotationMetadata实例，就代表当前项有注解修饰，可以进行下一步ConfigurationClassUtils.isConfigurationCandidate()判断操作
 			if (metadata instanceof AnnotationMetadata &&
+					// 判断是不是一个配置类
+					//（1）检查bean是不是一个接口，如果是，返回false，代表当前类不是一个配置类
+					//（2）检查bean中是否包含@Component、@ComponentScan、@Import、@ImportResource中的任意一个，包含的话，就返回true，代表当前类是一个配置类，按照配置类的形式进行解析！
+					//（3）检查bean中是否有@Bean，是的话，就返回true，也代表当前类是一个配置类，按照配置类的形式进行解析！
 					ConfigurationClassUtils.isConfigurationCandidate((AnnotationMetadata) metadata)) {
-				// 递归调用，目的还是为了解析
+
+				// 将当前配置阶段，标记为"解析配置类阶段"，然后递归调用，继续判定是否应该跳过当前项
+				// 题外：递归调用，判断是否应该跳过
 				return shouldSkip(metadata, ConfigurationPhase.PARSE_CONFIGURATION/* 解析配置 */);
 			}
-			// 递归调用，目的还是为了解析
+
+			/*
+
+			(2)如果当前@@Conditional修饰的类，如果不包含上述注解，也就是不是一个配置类，
+			那么就将当前的配置阶段设置为"注册Bean阶段"，然后进行递归，带着明确的配置阶段，重新判断是否应该跳过当前项
+
+			*/
+			// 将当前配置阶段，标记为"注册bean阶段"，然后递归调用，继续判定是否应该跳过当前项
 			return shouldSkip(metadata, ConfigurationPhase.REGISTER_BEAN/* 注册Bean */);
 		}
 
-		/*
-
-		2.1、获取@Conditional上面的value属性值，是一个数组，也就是条件类数组；
-		然后遍历条件类数组，获取每一个类的全限定类名，通过全限定类名获取对应的Class对象，然后通过Class对象创建对应的条件类实例，放入conditions集合中；
-
-		*/
-
+		/* 2.2、获取@Conditional中配置的所有条件类的全限定类名，然后通过反射，创建条件对象 */
+		// 存放条件对象
 		List<Condition> conditions = new ArrayList<>();
-		// ⚠️获取到@Conditional注解的value属性数组，也就是对应的条件类数组！
-		// ⚠️题外：一个类上只能写一个@Conditional注解
+		/**
+		 * 1、一个类上只能写一个@Conditional，不过一个@Conditional可以配置多个条件类
+		 *
+		 * 2、getConditionClasses(metadata)：获取@Conditional中配置的所有条件类的全限定类名
+		 */
+		// 遍历@Conditional中配置的所有条件类的全限定类名
 		for (String[] conditionClasses : getConditionClasses(metadata)) {
-			for (String conditionClass : conditionClasses) {
-				// ⚠️⚠️会直接通过反射，创建@Conditional里面value属性对应的类的对象（条件对象）
+			for (String conditionClass/* @Condition中条件类的全限定类名 */ : conditionClasses) {
+				// ⚠️通过@Condition中条件类的全限定类名和反射，创建条件对象
 				Condition condition = getCondition(conditionClass/* 条件类的全限定类名，用于反射创建条件对象 */, this.context.getClassLoader());
 				conditions.add(condition);
 			}
@@ -142,32 +165,35 @@ class ConditionEvaluator {
 
 		/*
 
-		2.2、遍历条件类实例，调用条件类实例的matches()，
-		只要其中有一个条件类实例的matches()返回false，也就是不匹配，那么当前函数方法就返回true，跳过此bd的解析！
-		只有所有的条件类实例的matches()都返回true，也就是都匹配，当前函数方法才会返回false，也就是不跳过，进行解析！
-
-		(判断当前这个类是否满足条件。如果满足，就留下来；不满足，就跳过。相当于做了一些最基本的验证规则)
+		2.3、遍历条件对象，如果"条件对象没有作用阶段 || 条件对象的执行阶段和当前阶段相同"，那么就执行条件对象的matches()，判断当前项是否满足条件，是否需要跳过
+		（1）只要其中有一个条件类对象的matches()返回false，则代表不匹配，那么当前函数就返回true，跳过当前项的解析
+		（2）只有所有的条件对象的matches()都返回true，也就是都匹配，当前函数才会返回false，也就是不跳过当前项，进行当前项的解析！
 
 		*/
 
 		for (Condition condition : conditions) {
 			ConfigurationPhase requiredPhase = null;
-			// 判断条件对象是不是ConfigurationCondition的实例
+
+			// 如果条件对象实现了ConfigurationCondition，则执行ConfigurationCondition#getConfigurationPhase()，获取ConfigurationPhase
+			// 注意：⚠️ConfigurationCondition extends Condition
 			if (condition instanceof ConfigurationCondition) {
 				requiredPhase = ((ConfigurationCondition) condition).getConfigurationPhase/* 获取配置阶段 */();
 			}
-			// requiredPhase只可能是null或者是ConfigurationCondition的一个实例对象
+
 			/**
-			 * condition.matches(this.context, metadata)：调用条件类实例的matches()
-			 * >>> true：代表匹配，代表满足条件，就留下来，不跳过，接着往下进行解析
-			 * >>> false：代表不匹配，代表不满足条件，就跳过，不往下进行解析了
+			 * 1、condition.matches(this.context, metadata)：执行条件对象的matches()方法
+			 * >>> true：代表匹配，满足条件，不跳过
+			 * >>> false：代表不匹配，不满足条件，跳过
+			 * （由于会取反，所以matches()返回true代表匹配，所以不跳过；返回false代表不匹配，所以跳过）
 			 */
-			if ((requiredPhase == null || requiredPhase == phase) && !condition.matches(this.context, metadata)) {
+			// 1、"当前条件对象没有声明作用的阶段 || 或者当前条件对象声明的作用阶段和当前阶段正好相同"，那就去执行条件对象的matches()，来判断当前项是否应该跳过！
+			// 2、如果当前条件对象声明的作用阶段，与当前阶段不符合，则不去执行条件对象的matches()，也就是跳过不执行当前条件对象！
+			if ((requiredPhase == null || requiredPhase == phase) && /* ⚠️ */!condition.matches(this.context, metadata)) {
 				// 一共有的逻辑是：
-				// 1、requiredPhase不是ConfigurationCondition的实例
-				// 2、phase==requiredPhase，从上述的递归可知：phase可为ConfigurationPhase.PARSE_CONFIGURATION或者ConfigurationPhase.REGISTER_BEAN
-				// 3、condition.matches(this.context,metadata)返回false
-				// ⚠️如果1、2或者1、3成立，则在此函数的上层将阻断bean注入Spring容器
+				// 1、当前条件对象没有声明作用的阶段
+				// 2、当前条件对象声明的作用阶段和当前阶段正好相同
+				// 3、执行条件对象的matches()，不匹配，返回false
+				// ⚠️如果【1、2】或者【1、3】成立，则在此函数的上层跳过当前项
 				return true;
 			}
 		}
@@ -175,14 +201,23 @@ class ConditionEvaluator {
 		return false;
 	}
 
+	/**
+	 * 获取@Conditional的value属性值，也就是配置的所有条件类的全限定类名
+	 */
 	@SuppressWarnings("unchecked")
 	private List<String[]> getConditionClasses/* 获取条件类 */(AnnotatedTypeMetadata metadata) {
-		// ⚠️获取到@Conditional注解的value属性数组，也就是对应的条件类数组！
 		MultiValueMap<String, Object> attributes = metadata.getAllAnnotationAttributes/* 获取所有注解属性 */(Conditional.class.getName(), true);
+		// ⚠️获取@Conditional的value属性值，也就是条件类数组
 		Object values = (attributes != null ? attributes.get("value") : null);
 		return (List<String[]>) (values != null ? values : Collections.emptyList());
 	}
 
+	/**
+	 * 根据条件类的全限定类名，反射实例化条件对象
+	 *
+	 * @param conditionClassName			条件类的全限定类名
+	 * @param classloader					类加载器
+	 */
 	private Condition getCondition(String conditionClassName/* 条件类的全限定类名 */, @Nullable ClassLoader classloader) {
 		// ⚠️通过全限定类名称得到对应的Class对象
 		Class<?> conditionClass = ClassUtils.resolveClassName/* 解析类名 */(conditionClassName, classloader);

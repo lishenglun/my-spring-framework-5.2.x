@@ -36,10 +36,12 @@ public interface ConfigurationCondition extends Condition {
 
 
 	/**
+	 * 条件对象的作用阶段
+	 * 例如：当前的ConditionEvaluator#shouldSkip()阶段是解析配置，但是条件对象的作用阶段是注册Bean，那么就不会执行条件对象的matches()方法
+	 *
 	 * The various configuration phases where the condition could be evaluated.
 	 *
-	 * 可以评估条件的各种配置阶段。
-	 *
+	 * 可以评估条件的各种配置阶段
 	 */
 	enum ConfigurationPhase {
 
@@ -48,6 +50,9 @@ public interface ConfigurationCondition extends Condition {
 		 * class is being parsed.
 		 * <p>If the condition does not match at this point, the {@code @Configuration}
 		 * class will not be added.
+		 *
+		 * {@link Condition} 应该被评估为 {@code @Configuration} 类正在被解析。
+		 * <p>如果此时条件不匹配，则不会添加 {@code @Configuration} 类。
 		 */
 		PARSE_CONFIGURATION/* 解析配置 */,
 
@@ -57,6 +62,9 @@ public interface ConfigurationCondition extends Condition {
 		 * {@code @Configuration} classes from being added.
 		 * <p>At the time that the condition is evaluated, all {@code @Configuration}s
 		 * will have been parsed.
+		 *
+		 * 在添加常规（非 {@code @Configuration}）bean 时，应评估 {@link Condition}。该条件不会阻止添加 {@code @Configuration} 类。
+		 * <p>在评估条件时，所有 {@code @Configuration} 都将被解析。
 		 */
 		REGISTER_BEAN /* 注册Bean */
 	}

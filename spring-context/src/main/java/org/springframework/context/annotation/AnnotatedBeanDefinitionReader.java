@@ -88,7 +88,8 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
-		// 条件计算器：对@Conditional的扫描
+
+		// 条件计算器：对@Conditional的操作
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
 
 		// 注册注解配置处理器
@@ -265,6 +266,8 @@ public class AnnotatedBeanDefinitionReader {
 
 		// AnnotatedGenericBeanDefinition implements AnnotatedBeanDefinition，间接实现了BeanDefinition
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
+
+		// 根据@Condition来判断，是否要跳过当前配置类
 		if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {
 			return;
 		}

@@ -229,14 +229,14 @@ abstract class ConfigurationClassUtils {
 	 * configuration class processing; {@code false} otherwise
 	 */
 	public static boolean isConfigurationCandidate(AnnotationMetadata metadata) {
-		/* 1、检查BD是不是一个接口，如果是，直接返回 */
+		/* 1、检查BD是不是一个接口，如果是，直接返回false，代表当前类不是一个配置类 */
 
 		// Do not consider an interface or an annotation... —— 不要考虑接口或注释...
 		if (metadata.isInterface()) {
 			return false;
 		}
 
-		/* 2、检查bean中是否包含@Component、@ComponentScan、@Import、@ImportResource中的任意一个 */
+		/* 2、检查bean中是否包含@Component、@ComponentScan、@Import、@ImportResource中的任意一个，包含的话，返回true，代表当前类是一个配置类，按照配置类的形式进行解析！ */
 
 		// Any of the typical annotations found?
 		for (String indicator : candidateIndicators) {
@@ -252,7 +252,7 @@ abstract class ConfigurationClassUtils {
 
 		// 如果不存在上述注解
 
-		/* 3、检查是否有@Bean标注的方法 */
+		/* 3、检查是否有@Bean标注的方法，如果有的话，返回true，代表当前类是一个配置类，按照配置类的形式进行解析！ */
 
 		// Finally, let's look for @Bean methods... —— 最后，让我们寻找@Bean 方法......
 		try {

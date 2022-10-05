@@ -20,6 +20,10 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
+ * 条件
+ *
+ * 一般用于：根据条件判断是否解析配置类；是否注入bean到容器中
+ *
  * A single {@code condition} that must be {@linkplain #matches matched} in order
  * for a component to be registered.
  *
@@ -42,15 +46,20 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public interface Condition {
 
 	/**
-	 * Determine if the condition matches.
+	 * 判断条件是否匹配
 	 *
-	 * 判断条件是否匹配。
+	 * Determine if the condition matches. —— 判断条件是否匹配
 	 *
 	 * @param context the condition context
-	 *                判断条件能使用的上下文环境
+	 *
+	 *                是一个{@link ConditionEvaluator.ConditionContextImpl}，是在执行条件对象matches()时，条件判断所使用的上下文环境，
+	 *                里面包含了BeanDefinitionRegistry、ConfigurableListableBeanFactory、Environment等对，方便我们进行条件判断！
+	 *
 	 * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
 	 * or {@link org.springframework.core.type.MethodMetadata method} being checked
-	 *                 注解所在位置的注解元数据信息
+	 *
+	 *                 @Condition所在标注类的注解元数据
+	 *
 	 * @return {@code true} if the condition matches and the component can be registered,
 	 * or {@code false} to veto the annotated component's registration
 	 *

@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 条件注解
+ *
  * Indicates that a component is only eligible for registration when all
  * {@linkplain #value specified conditions} match.
  *
@@ -62,6 +64,8 @@ import java.lang.annotation.Target;
 public @interface Conditional {
 
 	/**
+	 * 条件数组
+	 *
 	 * All {@link Condition Conditions} that must {@linkplain Condition#matches match}
 	 * in order for the component to be registered.
 	 */
