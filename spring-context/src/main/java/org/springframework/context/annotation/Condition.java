@@ -46,13 +46,13 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 public interface Condition {
 
 	/**
-	 * 判断条件是否匹配
+	 * 条件判断是否匹配
 	 *
 	 * Determine if the condition matches. —— 判断条件是否匹配
 	 *
 	 * @param context the condition context
 	 *
-	 *                是一个{@link ConditionEvaluator.ConditionContextImpl}，是在执行条件对象matches()时，条件判断所使用的上下文环境，
+	 *                用于条件判断时使用的上下文环境，一般是一个{@link ConditionEvaluator.ConditionContextImpl}对象，
 	 *                里面包含了BeanDefinitionRegistry、ConfigurableListableBeanFactory、Environment等对，方便我们进行条件判断！
 	 *
 	 * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
