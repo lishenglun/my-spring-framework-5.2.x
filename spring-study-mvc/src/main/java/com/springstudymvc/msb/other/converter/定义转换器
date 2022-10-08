@@ -1,0 +1,22 @@
+
+1、先实现一个转换器，例如实现Converter接口
+
+2、在spring配置文件中配置类型转换器
+
+spring配置类型转换器的机制是：将自定义的转换器注册到类型转换服务中去
+
+	<!--	配置类型转换工厂	-->
+	<bean id="converterSource" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<!--	给工厂注入一个新的类型转换器	-->
+		<property name="converters">
+			<array>
+				<!--	配置自定义类型转换器	-->
+				<bean class="com.springstudymvc.msb.other.converter.StringToDateConverter"/>
+			</array>
+		</property>
+	</bean>
+
+3、在spring mvc文件中，引用自定义类型转换服务，从而引用了自定义类型转换器
+
+	<!-- 引用自定义类型转换器 -->
+	<mvc:annotation-driven conversion-service="conversionService"/>

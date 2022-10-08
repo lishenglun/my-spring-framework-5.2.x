@@ -19,6 +19,7 @@ package org.springframework.beans;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.CollectionFactory;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -57,13 +58,22 @@ class TypeConverterDelegate/* 类型转换委托器 */ {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
 
+	/**
+	 * 1、SimpleTypeConverter，⚠️里面包含了ConverterService
+	 *
+	 * 由来：
+	 * {@link org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver#resolveArgument()}调用参数解析器解析参数值
+	 * ——> binder.convertIfNecessary() = WebDataBinder extends {@link org.springframework.validation.DataBinder#convertIfNecessary(Object, Class, MethodParameter)}
+	 * ——> getTypeConverter() = {@link org.springframework.validation.DataBinder#getTypeConverter()}
+	 * ——> getSimpleTypeConverter() = {@link org.springframework.validation.DataBinder#getSimpleTypeConverter()}
+	 * 在里面创建了SimpleTypeConverter。在SimpleTypeConverter构造器当中，创建和保存了TypeConverterDelegate。在创建TypeConverterDelegate时，同时把SimpleTypeConverter也交给了TypeConverterDelegate.propertyEditorRegistry变量
+	 */
 	// 属性编辑器注册表支持者，里面存储了属性编辑器，用来管理属性编辑器（默认的和自定义的）
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
 	// 要处理的目标对象（作为可传递给编辑器的上下文）
 	@Nullable
 	private final Object targetObject;
-
 
 	/**
 	 * 创建一个新的 TypeConverterDelegate 实例
@@ -124,14 +134,13 @@ class TypeConverterDelegate/* 类型转换委托器 */ {
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
-	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue/* 参数值 */,
+	public <T> T convertIfNecessary(@Nullable String propertyName, @Nullable Object oldValue, @Nullable Object newValue/* 参数值/属性值 */,
 			@Nullable Class<T> requiredType/* 参数类型 */, @Nullable TypeDescriptor typeDescriptor/* 里面包含了单个方法参数 */) throws IllegalArgumentException {
 
 
-		/* 1、根据类型，获取到对应的自定义属性编辑器 */
-
 		// Custom editor for this type? —— 自定义编辑这个类型吗？
 
+		// 1、根据类型，获取到对应的自定义属性编辑器
 		// 题外：PropertyEditor：属性编辑器的接口，它规定了将外部设置值转换为内部JavaBean属性值的转换接口方法。
 		// 题外：一个类型对应的属性编辑器只有一个
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType/* 属性类型Address Class */, propertyName);
@@ -139,21 +148,24 @@ class TypeConverterDelegate/* 类型转换委托器 */ {
 		// 尝试使用自定义ConversionService转换newValue，转换失败后抛出的异常
 		ConversionFailedException conversionAttemptEx/* 转换尝试前 */ = null;
 
+		/* 1、没有自定义编辑器，但是指定了自定义ConversionService，就使用自定义ConversionService进行转换 */
 		// No custom editor but custom ConversionService specified? —— 没有自定义编辑器，但指定了自定义ConversionService？
 		/**
 		 * ConversionService：类型转换的服务接口。这个转换系统的入口。
 		 */
-		// 获取类型转换服务
+		// ⚠️获取类型转换服务
+		// 注意：⚠️ConversionService一般为null。Spring有提供ConversionService的实现类，但是不提供默认的ConversionService bean的，只有在我们明确配置了ConversionService bean的时候，才不为null。
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
-
-		// 不存在自定义的属性编辑器，并且存在类型转换服务，并且存在参数值，并且存在类型描述符
+		// ""不存在自定义的属性编辑器 && 存在类型转换服务 && 存在参数值 && 存在类型描述符""
 		if (editor == null && conversionService != null && newValue != null && typeDescriptor != null) {
-			// 将参数值封装成类型描述符对象
+			// 将参数值封装成TypeDescriptor(类型描述符)对象
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
+
 			// 如果sourceTypeDesc的对象能被转换成typeDescriptor.
 			if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
 				try {
-					// 从conversionService 中找到 sourceTypeDesc,typeDesriptor对于的转换器进行对newValue的转换成符合typeDesciptor类型的对象，并返回出去
+					// ⚠️从ConversionService中，找到sourceTypeDesc，typeDescriptor对应的转换器，
+					// 然后用转换器对newValue进行转换，变成符合typeDescriptor类型的对象，并返回出去
 					return (T) conversionService.convert(newValue, sourceTypeDesc, typeDescriptor);
 				}
 				catch (ConversionFailedException ex) {
@@ -163,6 +175,8 @@ class TypeConverterDelegate/* 类型转换委托器 */ {
 				}
 			}
 		}
+
+		/* 2、用属性编辑器进行转换 */
 
 		// 属性编辑器转换后的值（首先等于️要被转换的值，然后用这个要被转换的值去进行转换，得到转换后的值）
 		// 默认转换后的值为newValue
@@ -321,7 +335,7 @@ class TypeConverterDelegate/* 类型转换委托器 */ {
 					// 重新抛出conversionAttemptEx
 					throw conversionAttemptEx;
 				}
-				// 如果conversionService不为null&&typeDescriptor不为null
+				/* 存在自定义的ConversionService && typeDescriptor不为null */
 				else if (conversionService != null && typeDescriptor != null) {
 					// ConversionService not tried before, probably custom editor found
 					// but editor couldn't produce the required type...
@@ -329,7 +343,7 @@ class TypeConverterDelegate/* 类型转换委托器 */ {
 					TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
 					// 如果sourceTypeDesc的对象能被转换成typeDescriptor
 					if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
-						// 将newValue转换为typeDescriptor对应类型的对象
+						// ⚠️将newValue转换为typeDescriptor对应类型的对象
 						return (T) conversionService.convert(newValue, sourceTypeDesc, typeDescriptor);
 					}
 				}

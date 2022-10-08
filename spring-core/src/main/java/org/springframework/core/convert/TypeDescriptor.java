@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
+ * TypeDescriptor是对于一种类型的封装，里面包含该种类型的值、实际类型等等信息。
+ *
  * 把基础类型，方法参数，属性，class等都进行封装描述
  *
  * Contextual descriptor about a type to convert from or to.

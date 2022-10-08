@@ -38,7 +38,7 @@ import org.springframework.lang.Nullable;
 public interface Converter<S, T> {
 
 	/**
-	 * 将S类型转换成T类型
+	 * 类型转换。将原类型对象作为参数传入，进行转换之后，返回目标类型对象 —— 将S类型(原始类型)转换成T类型(目标类型)
 	 *
 	 * Convert the source object of type {@code S} to target type {@code T}.
 	 * @param source the source object to convert, which must be an instance of {@code S} (never {@code null})

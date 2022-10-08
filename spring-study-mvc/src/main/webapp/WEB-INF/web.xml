@@ -8,16 +8,16 @@
           http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		 version="3.0">
 
-	<!--	tomcat容器参数	-->
+	<!--	1、tomcat容器参数	-->
 	<context-param>
 		<!--	spring的配置文件位置	-->
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:msb/spring/spring-other-interceptor.xml</param-value>
+		<param-value>classpath:msb/spring/spring-other-converter.xml</param-value>
 	</context-param>
 
 	<!--
 
-	在以前使用servlet的时候，是一个请求一个servlet，现在spring mvc里面，是所有的请求，都走一个servlet，就是spring mvc的DispatcherServlet，
+	2、在以前使用servlet的时候，是一个请求一个servlet，现在spring mvc里面，是所有的请求，都走一个servlet，就是spring mvc的DispatcherServlet，
 	然后由DispatcherServlet根据请求路径，分发请求到不同的handler
 
 	-->
@@ -28,7 +28,7 @@
 		<!--	spring mvc的配置文件位置	-->
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:msb/springmvc/springmvc-other-interceptor.xml</param-value>
+			<param-value>classpath:msb/springmvc/springmvc-other-converter.xml</param-value>
 		</init-param>
 		<!--	为0或正整数，表示在服务器启动的时候进行创建	-->
 		<!--	为负数，表示在第一次访问的时候进行创建	-->
@@ -42,12 +42,12 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
-	<!--	监听器：用于初始化spring容器	-->
+	<!--	3、监听器：用于初始化spring容器	-->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
-	<!--	异步servlet	-->
+	<!--	4、自定义原始的异步servlet	-->
 	<servlet>
 		<servlet-name>AsyncServlet</servlet-name>
 		<servlet-class>com.springstudymvc.msb.mvc_11.AsyncServlet</servlet-class>

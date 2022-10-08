@@ -1837,7 +1837,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 * 现在全部放入到一个包装类里面了，包装类里面本身就提供了很多这样的功能，所以我直接使用当前包装类，就能完成当前需要的所有功能，直接干就完事了
 			 * 这是它设计方便的一个地方
 			 */
-			// 包装成BeanWrapperImpl
+			// 创建一个BeanWrapperImpl，包装beanInstance
 			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
 			/**
 			 * ⚠️里面填充了BeanWrapperImpl的overriddenDefaultEditors、customEditors属性，也就是：
@@ -1846,6 +1846,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 */
 			// 初始化BeanWrapper
 			initBeanWrapper(bw);
+
 			return bw;
 		}
 		catch (Throwable ex) {
@@ -2133,7 +2134,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// 如果pvs不为null
 		if (pvs != null) {
 			// 应用给定的属性值，解决任何在这个bean工厂运行时其他bean的引用。必须使用深拷贝，所以我们不会永久地修改这个属性
-			// ⚠️将属性应用到bean中
+			// ⚠️应用属性值到bean中
 			applyPropertyValues/* 应用属性值（设置属性值） */(beanName, mbd, bw, pvs);
 		}
 	}
@@ -2450,29 +2451,32 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
 		}
 
-		// MutablePropertyValues：PropertyValues接口的默认实现，允许对属性进行简单操作，并提供构造函数来支持从映射 进行深度复制和构造
+		/**
+		 * MutablePropertyValues：PropertyValues接口的默认实现，允许对属性进行简单操作，并提供构造函数来支持从映射 进行深度复制和构造
+		 */
+		// 封装属性值
 		MutablePropertyValues/* 可变属性值 */ mpvs = null;
 		// 原始属性列表
 		List<PropertyValue> original;
 
 		// 如果pvs是MutablePropertyValues
 		if (pvs instanceof MutablePropertyValues) {
-			// 类型强制转换
 			mpvs = (MutablePropertyValues) pvs;
-			// isConverted()：返回该holder是否只包含转换后的值(true)，或者是否仍然需要转换这些值
-			// 如果mpvs只包含转换后的值
 			/**
-			 * 判断mpvs是否需要被转换：
+			 * 1、isConverted()：返回该holder是否只包含转换后的值(true)，或者是否仍然需要转换这些值
+			 *
+			 * 2、判断mpvs是否需要被转换：
 			 * 如果为true，代表之前处理过了，包含转换后的值，直接设置即可
 			 * 如果为false，代表之前没有处理过，不包含转换后的值，这些值仍然可能需要转换，就把原始列表里面的值，直接赋给original
 			 *
-			 * 这块之前没有做过任何处理，结果是false；如果之前处理过了，会标记为true，直接把它进行设置就可以了，而不需要做额外的处理。
+			 * 3、这块之前没有做过任何处理，结果是false；如果之前处理过了，会标记为true，直接把它进行设置就可以了，而不需要做额外的处理。
 			 * 这相当于做了一个短路，如果我之前处理过了，我后面就不需要重复处理了。
 			 */
-			if (mpvs.isConverted()) { // 如果mpvs中的值已经被转换为对应的类型，那么可以直接设置到beanWapper中
+			// 如果mpvs中的值已经被转换为对应的类型，那么可以直接设置到beanWapper中
+			if (mpvs.isConverted()) {
 				// Shortcut: use the pre-converted values as-is.
 				try {
-					// 已完成，直接返回
+					// 设置属性值到bean对象中
 					bw.setPropertyValues(mpvs);
 					return;
 				}
@@ -2483,24 +2487,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			// 获取mpvs的PropertyValue列表
+			// 获取属性值对象的原始类型值
 			original = mpvs.getPropertyValueList();
 		}
 		else {
-			// 获取pVs的PropertyValue对象数组，并将其转换成列表
+			// 获取pvs的PropertyValue对象数组，并将其转换成列表
+			// 如果 pvs 并不是使用 MutablePropertyValues 封装类型，那么直接使用原始的属性获取方法
 			original = Arrays.asList(pvs.getPropertyValues()); // 如果pvs并不是使用mutablePropertyValue封装的类型，那么直接使用原始的属性获取
 		}
 
 		// 获取用户自定义的类型转换器
-		TypeConverter converter = getCustomTypeConverter();
-		// 如果转换器为空，则直接把包装类赋值给converter
+		TypeConverter/* 类型转换器 */ converter = getCustomTypeConverter();
+		/**
+		 * 1、为什么bw可以赋值给converter？
+		 * 因为BeanWrapperImpl实现了TypeConverter接口，所以可以直接赋值，并且会使用当前spring定好的，自动提供给我们的类型转换器，而不需要我们自己操作了
+		 */
+		// 如果没有自定义的类型转换器，则使用bean对象的BeanWrapper作为类型转换器
 		if (converter == null) {
-			/**
-			 * 为什么把bw给converter？
-			 * 因为BeanWrapperImpl实现了TypeConverter接口，所以可以直接赋值，
-			 * 并且会使用当前spring定好的，自动提供给我们的类型转换器，而不需要我们自己操作了
-			 */
 			converter = bw;
 		}
+
 		// BeanDefinitionValueResolver：在bean工厂实现中使用Helper类，它将bd对象中包含的值解析为应用于 目标bean实例的实际值
 		// 题外：bd里面包含的value值是什么类型？不清楚，所以需要进行分析处理（判断是什么类型，根据当前具体的属性类型进行具体的对应处理）
 		BeanDefinitionValueResolver/* bean定义信息的值处理器 */ valueResolver = new BeanDefinitionValueResolver(this, beanName, mbd, converter); // 获取对应的解析器
@@ -2578,8 +2584,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (convertible) {
 					// ⚠️转换对应的属性值！—— 这里开始调用自定义编辑器进行属性转换！
 					// 将resolvedValue转换为指定的目标属性对象
+					// 注意：⚠️里面牵扯ConversionService
 					convertedValue = convertForProperty(resolvedValue/* 河北省_邯郸市_武安市 */, propertyName/* address */, bw, converter);
 				}
+
 				// Possibly store converted value in merged bean definition,
 				// in order to avoid re-conversion for every created bean instance.
 				// 上面的翻译：可能将转换后的值存储在合并的 bean 定义中，以避免对每个创建的 bean 实例进行重新转换。
@@ -2644,6 +2652,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (converter instanceof BeanWrapperImpl) {
 			// ⚠️转换对应的属性值！
 			// 河北省_邯郸市_武安市 => Address{province='河北省', city='邯郸市', area='武安市'}
+			// 注意：⚠️里面牵扯ConversionService
 			return ((BeanWrapperImpl) converter).convertForProperty(value, propertyName);
 		}
 		else {

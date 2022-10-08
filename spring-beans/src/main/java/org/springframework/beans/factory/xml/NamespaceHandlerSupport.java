@@ -76,10 +76,11 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		/**
-		 * 如果是<context:component-scan>标签，那么获取到的解析器，parser = ComponentScanBeanDefinitionParser
-		 * 如果是<aop:config>标签，那么获取到的解析器，parser = ConfigBeanDefinitionParser
-		 * 如果是<tx:advice>标签，那么获取到的解析器，parser = TxAdviceBeanDefinitionParser
-		 * 如果是<<context:property-placeholder>标签，那么获取到的解析器，parser = PropertyPlaceholderBeanDefinitionParser
+		 * 1、如果是<context:component-scan>，那么获取到的标签解析器parser = ComponentScanBeanDefinitionParser
+		 * 2、如果是<aop:config>，那么获取到的标签解析器parser = ConfigBeanDefinitionParser
+		 * 3、如果是<tx:advice>，那么获取到的标签解析器parser = TxAdviceBeanDefinitionParser
+		 * 4、如果是<<context:property-placeholder>，那么获取到的标签解析器parser = PropertyPlaceholderBeanDefinitionParser，
+		 * 5、如果是<mvc:annotation-driven/>，那么获取到的标签解析器parser = AnnotationDrivenBeanDefinitionParser
 		 */
 		// 🚩根据标签名称获取到对应的解析器(标签解析器)
 		BeanDefinitionParser parser/* 解析器 */ = findParserForElement/* 查找元素解析器 */(element/* 元素 */, parserContext);

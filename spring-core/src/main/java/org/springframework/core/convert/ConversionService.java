@@ -19,9 +19,9 @@ package org.springframework.core.convert;
 import org.springframework.lang.Nullable;
 
 /**
- * 类型转换服务
+ * 用于类型转换的服务接口：统一调用Converter
  *
- * 为了统一调用Converter进行类型转换，spring为我们提供了一个ConversionService接口
+ * 为了统一调用Converter进行类型转换，spring为我们提供了一个ConversionService接口。通过实现这个接口我们可以实现自己的Converter调用逻辑
  *
  * A service interface for type conversion. This is the entry point into the convert system.
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
@@ -31,9 +31,11 @@ import org.springframework.lang.Nullable;
  * @since 3.0
  *
  */
-public interface ConversionService {
+public interface ConversionService/* 类型转换服务 */ {
 
-	/* TypeDescriptor是对于一种类型的封装，里面包含该种类型的值、实际类型等等信息。 */
+	// TypeDescriptor是对于一种类型的封装，里面包含该种类型的值、实际类型等等信息。
+
+	/* canConvert()：是否能够转换 —— 判断当前的ConversionService是否能够对原类型和目标类型进行转换 */
 
 	/**
 	 * 判断能否进行类型转换（是否支持原类型到目标类型的转换）
@@ -73,6 +75,8 @@ public interface ConversionService {
 	 */
 	// 是否支持原类型到目标类型的转换
 	boolean canConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	/* convert()：进行转换 */
 
 	/**
 	 * 类型转换，获取合适的转换器进行关型的转换，默认是DefaultConversionService.也可以是自定义的

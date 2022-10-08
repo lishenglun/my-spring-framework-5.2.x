@@ -90,6 +90,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private BeanExpressionResolver beanExpressionResolver;
 
 	/** Spring ConversionService to use instead of PropertyEditors. */
+	// 类型转换服务
 	@Nullable
 	private ConversionService conversionService;
 
@@ -555,19 +556,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
-	 * 该bean工厂是否包含具有给定名称的bean定义或者外部注册的singleton实例
+	 * 所有容器中是否包含name的bean或者bd
 	 */
 	@Override
 	public boolean containsBean(String name) {
-		/* 是否有当前name对应的bean或者bd */
+		/* 1、检查当前容器中，是否有对应beanName的bean或者bd，有其中之一，就返回true */
 
 		// 获取name最终的规范名称【最终别名称】—— 也就是去掉开头所有的&符号
 		String beanName = transformedBeanName(name);
-		// 如果beanName存在于singletonObjects【单例对象的高速缓存Map集合】中，
-		// 或者从beanDefinitionMap【Bean定义对象映射】中存在该beanName的BeanDefinition对象
+		// ⚠️beanName存在于singletonObjects中 || beanName存在于beanDefinitionMap中
 		if (containsSingleton(beanName)/* 包含单例bean */ || containsBeanDefinition(beanName)/* 包含bd */) {
+			// beanName不是以&符号开始 || 是一个FactoryBean
 			return (!BeanFactoryUtils.isFactoryDereference(name) || isFactoryBean(name));
 		}
+
+		/* 2、当前容器没有找到，就递归去父容器中查找是否有对应beanName的bean或者bd，有其中之一，就返回true */
+
 		// Not found -> check parent.
 		// 获取父工厂
 		BeanFactory parentBeanFactory = getParentBeanFactory();
@@ -1273,16 +1277,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		String beanName = transformedBeanName(name);
 		// 尝试从缓存中获取bean实例对象
 		Object beanInstance = getSingleton(beanName, false);
+
 		if (beanInstance != null) {
 			// beanInstance存在，则直接判断类型是否为FactoryBean
 			return (beanInstance instanceof FactoryBean);
 		}
+
 		// No singleton instance found -> check bean definition.
 		// 如果缓存中不存在此beanName && 父beanFactory是ConfigurableBeanFactory,则调用父BeanFactory判断是否为FactoryBean
 		if (!containsBeanDefinition(beanName) && getParentBeanFactory() instanceof ConfigurableBeanFactory) {
 			// No bean definition found in this factory -> delegate to parent.
 			return ((ConfigurableBeanFactory) getParentBeanFactory()).isFactoryBean(name);
 		}
+
 		// 通过MergedBeanDefinition来检查beanName对应的bean是否为FactoryBean
 		return isFactoryBean(beanName, getMergedLocalBeanDefinition(beanName));
 	}
@@ -1428,7 +1435,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected void initBeanWrapper(BeanWrapper bw) {
 		/* 前面设置的一些自定义属性编辑器，类型转换器，通过初始化之后，都包含在包装类里面了，有了这些功能 */
 
-		/* 1、设置类型转换服务 —— ConversionService */
+		/* 1、设置ConversionService(类型转换服务) */
+		/**
+		 *
+		 */
 		// 使用该工厂的ConversionService来作为bw的ConversionService，用于转换属性值，以替换JavaBeans PProperty
 		bw.setConversionService(getConversionService());
 

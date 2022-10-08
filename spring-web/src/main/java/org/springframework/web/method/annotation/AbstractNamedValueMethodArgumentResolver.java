@@ -96,7 +96,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	/**
-	 * 解析单个方法参数值
+	 * 解析方法参数值（单个）
 	 */
 	@Override
 	@Nullable
@@ -111,7 +111,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		MethodParameter nestedParameter = parameter.nestedIfOptional/* 嵌套如果可选 */();
 
 		/* 1、获取参数名称 */
-
 		// 通过"名称值信息"对象，获取参数名称
 		Object resolvedName = resolveStringValue(namedValueInfo.name);
 		if (resolvedName == null) {
@@ -122,12 +121,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		// ⚠️以下是具体解析参数值
 
 		/* 2、根据参数名称，去request里面，获取参数值 */
-
 		// 根据参数名称，去request里面，获取参数值
 		Object arg = resolveName(resolvedName.toString(), nestedParameter, webRequest);
 
 		/* 3、如果从request中未能获取到参数值，就看有没有默认值，有默认值就使用默认值 */
-
 		// 如果没有从request中获取到参数值
 		if (arg == null) {
 			// 如果"名称值信息"对象中存在默认值，则使用默认值
@@ -147,32 +144,34 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			arg = resolveStringValue/* 解析字符串值 */(namedValueInfo.defaultValue);
 		}
 
-
 		/* 4、如果binderFactory不为空，则用它创建binder并转换解析出的参数 */
-
 		// 如果binderFactory不为空，则用它创建binder并转换解析出的参数
 		if (binderFactory != null) {
-			/**
-			 * WebDataBinder继承DataBinder，间接实现PropertyEditorRegistry, TypeConverter
-			 */
 			/*
 
-			4.1、为当前参数创建一个WebDataBinder对象，然后从当前Controller中的和全局的@InnitBinder方法中，筛选出适用的@InnitBinder方法，进行执行，来初始化WebDataBinder。
+			（1）为当前参数创建一个WebDataBinder对象，然后从当前Controller中的和全局的@InnitBinder方法中，筛选出适用的@InnitBinder方法，进行执行，来初始化WebDataBinder
 
 			题外：@InnitBinder方法中初始化WebDataBinder可以做的事情，例如：往WebDataBinder中的类型转换器里面，注册属性编辑器
 			题外：筛选出适用的@InnitBinder方法的规则：如果@InitBinder没有配置value属性值，或者@InitBinder中配置的value属性值包含当前"参数名称"，则代表适用。
 
 			 */
-			// binderFactory=DefaultDataBinderFactory
+			// binder=ServletRequestDataBinderFactory，
+			// ServletRequestDataBinderFactory extends InitBinderDataBinderFactory，所以是走⚠️DefaultDataBinderFactory#createBinder()
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name/* 参数名称 */);
+
+			/*
+
+			（2）调用WebDataBinder转换参数值（类型转换器里面包含了属性编辑器）
+			类型转换器会根据"参数类型"去找到对应的我们自定义的属性编辑器，然后用属性编辑器对参数值进行转换，最终返回转换后的数据，例如将：String类型的日期，转换成Data类型的日期！
+
+			*/
 			try {
-				/*
-
-				4.2、使用WebDataBinder里面的类型转换器来转换我们的参数值（类型转换器里面包含了属性编辑器）。
-				类型转换器会根据"参数类型"去找到对应的我们自定义的属性编辑器，然后用属性编辑器对参数值进行转换，最终返回转换后的数据，例如将：String类型的日期，转换成Data类型的日期！
-
+				/**
+				 * 1、WebDataBinder
+				 *
+				 * WebDataBinder extends DataBinder，间接实现PropertyEditorRegistry、TypeConverter
 				 */
-				// 转换当前参数值
+				// 调用WebDataBinder转换当前参数值
 				// 题外：题外：之所以要转换，是因为，http提交过来的请求，无论是url还是表单方式提交过来的数据都是字符串，字符串是没办法进行直接使用的，所以需要把这些字符串转成我想要的类型
 				arg = binder.convertIfNecessary(arg/* 参数值 */, parameter.getParameterType()/* 参数类型 */, parameter/* 单个方法参数 */);
 			}

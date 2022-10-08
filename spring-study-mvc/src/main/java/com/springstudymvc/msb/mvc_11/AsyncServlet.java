@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author lishenglun
  * @version v1.0.0
- * @description TODO
+ * @description 自定义原始的异步servlet
  * @date 2022/8/2 8:28 下午
  */
 public class AsyncServlet extends HttpServlet {

@@ -33,8 +33,10 @@ package org.springframework.beans;
 public class SimpleTypeConverter extends TypeConverterSupport {
 
 	public SimpleTypeConverter() {
-		// 创建类型转换器委托器
-		this.typeConverterDelegate = new TypeConverterDelegate(this);
+		// 创建类型转换器委托器，并且TypeConverterDelegate当中保存了SimpleTypeConverter
+		// 注意：⚠️TypeConverterDelegate当中保存了SimpleTypeConverter这点很重要！
+		this.typeConverterDelegate = new TypeConverterDelegate(this/* TypeConverterDelegate当中保存了SimpleTypeConverter */);
+
 		registerDefaultEditors();
 	}
 

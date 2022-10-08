@@ -207,6 +207,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 				this.validator.supports(binder.getTarget().getClass())) {
 			binder.setValidator(this.validator);
 		}
+		// ⚠️设置ConversionService到WebDataBinder中
 		if (this.conversionService != null) {
 			binder.setConversionService(this.conversionService);
 		}

@@ -17,7 +17,8 @@
 package org.springframework.core.convert.converter;
 
 /**
- * converter转换器的工厂类，用来获取对应的转换器
+ * 顾名思义，ConverterFactory就是产生Converter的一个工厂，用来获取对应的转换器。
+ * ConverterFactory接口只支持从一个原类型转换为一个目标类型对应的子类型。
  *
  * A factory for "ranged" converters that can convert objects from S to subtypes of R.
  *
@@ -37,11 +38,13 @@ package org.springframework.core.convert.converter;
 public interface ConverterFactory<S, R> {
 
 	/**
-	 * 获取转换器
+	 * 生产Converter（获取转换器）
 	 *
-	 *
+	 * 题外：S是源类型，T是目标类型，T是R的一个实例(T要么是R的子类，或者T就是R)
 	 *
 	 * Get the converter to convert from S to target type T, where T is also an instance of R.
+	 * 让转换器从 S 转换为目标类型 T，其中 T 也是 R 的一个实例。
+	 *
 	 * @param <T> the target type
 	 * @param targetType the target type to convert to
 	 * @return a converter from S to T

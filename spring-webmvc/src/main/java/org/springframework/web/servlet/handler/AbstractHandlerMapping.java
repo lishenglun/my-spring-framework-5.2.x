@@ -492,7 +492,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		/* 1、根据请求路径，获取到处理请求的Handler。如果没有就获取默认的，如果没有默认的handler，就返回null */
 		/**
-		 * ⚠️1、BeanNameUrlHandlerMapping走的是AbstractUrlHandlerMapping
+		 * ⚠️1、BeanNameUrlHandlerMapping走的是AbstractUrlHandlerMapping（处理的是实现了Controller接口，或者HttpRequest接口的bean）
 		 *
 		 * 内部获取Handler的逻辑：
 		 * >>> 获取请求路径，然后根据请求路径去handlerMap中查找对应的Handler，
@@ -504,7 +504,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		 * 注意：BeanNameUrlHandlerMapping返回的是HandlerExecutionChain，里面包含了handler、和PathExposingHandlerInterceptor
 		 * 题外：handlerMap是AbstractUrlHandlerMapping中的变量
 		 *
-		 * ⚠️2、RequestMappingHandlerMapping走的是RequestMappingInfoHandlerMapping
+		 * ⚠️2、RequestMappingHandlerMapping走的是RequestMappingInfoHandlerMapping（处理的是@Controller中的方法）
 		 * 内部获取Handler的逻辑：
 		 * >>> 先根据请求路径，从"请求地址映射缓存urlLookup"中，获取到mapping；
 		 * >>> 然后根据mapping，去"请求方法映射缓存mappingLockup"中，获取到对应的HandlerMethod，作为handler对象进行返回
@@ -512,7 +512,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		 * >>> 简略总结：通过请求路径获取HandlerMethod，作为handler对象
 		 *
 		 * 注意：RequestMappingHandlerMapping返回的是Handler
-		 * 题外：urlLookup和mappingLockup都是MappingRegistry中的map集合
+		 * 题外：urlLookup和mappingLockup都是MappingRegistry类中的map集合
 		 */
 		/**
 		 * 1、BeanNameUrlHandlerMapping和RequestMappingHandlerMapping获取的Handler的区别

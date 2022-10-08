@@ -29,6 +29,9 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
+	/**
+	 * {@link ConfigurableWebBindingInitializer}
+	 */
 	// 全局的@IniterBinder初始化器
 	@Nullable
 	private final WebBindingInitializer initializer;
@@ -40,6 +43,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * (or {@code null} if none)
 	 */
 	public DefaultDataBinderFactory(@Nullable WebBindingInitializer initializer) {
+		// ⚠️全局初始化器
 		this.initializer = initializer;
 	}
 
@@ -62,10 +66,10 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 		/*
 
 		1、为当前方法参数创建一个WebDataBinder对象，里面包含了参数名称
-
 		题外：@InitBinder修饰的方法，必须要有一个入参：WebDataBinder。
 
 		 */
+		// ServletRequestDataBinderFactory
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
 
 		/*
@@ -74,13 +78,14 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
 		 */
 		if (this.initializer != null) {
+			// ConfigurableWebBindingInitializer
 			this.initializer.initBinder(dataBinder, webRequest);
 		}
 
 		/*
 
-		3、遍历当前Controller中的和全局的@InnitBinder方法，然后执行适用的@IniterBinder方法，进行执行，来初始化WebDataBinder。
-		适用规则：如果@InitBinder没有配置value属性值，或者@InitBinder中配置的value属性值包含当前"参数名称"，则代表适用。
+		3、遍历当前Controller中的和全局的@InnitBinder方法，然后执行适用的@IniterBinder方法，来初始化当前方法参数对应的WebDataBinder。
+		适用规则：如果@InitBinder没有配置"value属性值"，或者@InitBinder中配置的"value属性值"包含当前"参数名称"，则代表适用。
 
 		 */
 		// 执行所有的数据绑定器的初始化方法，为当前参数的数据绑定器进行初始化

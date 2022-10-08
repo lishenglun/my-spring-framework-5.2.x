@@ -33,11 +33,21 @@ import org.springframework.util.ClassUtils;
  */
 abstract class ConversionUtils {
 
+	/**
+	 * 调用转换器，转换数据，得到转换后的目标类型数据返回
+	 *
+	 * @param converter			GenericConverter
+	 * @param source 			原始数据
+	 * @param sourceType 		原始类型
+	 * @param targetType 		目标类型
+	 */
 	@Nullable
-	public static Object invokeConverter(GenericConverter converter, @Nullable Object source,
+	public static Object invokeConverter(GenericConverter converter, @Nullable Object source/* 源数据 */,
 			TypeDescriptor sourceType, TypeDescriptor targetType) {
 
 		try {
+			// ⚠️调用转换器
+			/** {@link GenericConversionService.ConverterAdapter#convert(Object, TypeDescriptor, TypeDescriptor)}  */
 			return converter.convert(source, sourceType, targetType);
 		}
 		catch (ConversionFailedException ex) {

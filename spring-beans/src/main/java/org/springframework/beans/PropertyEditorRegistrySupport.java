@@ -54,6 +54,7 @@ import java.util.regex.Pattern;
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
+	// 类型转换服务
 	@Nullable
 	private ConversionService conversionService;
 

@@ -185,7 +185,6 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		/* 2、初始化spring mvc容器 */
 
 		// Let subclasses do whatever initialization they like. —— 让子类做他们喜欢的任何初始化。
-
 		// FrameworkServlet#initServletBean
 		initServletBean();
 	}

@@ -135,6 +135,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	// 存储，实现了RequestBodyAdvice接口或者ResponseBodyAdvice接口的@ControllerAdvice Bean
 	private final List<Object> requestResponseBodyAdvice = new ArrayList<>();
 
+	// 全局的初始化器
 	@Nullable
 	private WebBindingInitializer webBindingInitializer;
 
@@ -1197,6 +1198,18 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return attrMethod;
 	}
 
+	/**
+	 * 创建数据绑定工厂（WebDataBinderFactory），里面包含了当前Controller中的@InitBinder方法和全局@InitBinder方法。
+	 * 	（1）当前controller中的@InitBinder方法是在这里面进行识别的
+	 * 	（2）然后将全局@InitBinder方法与当前controller中的@InitBinder方法进行合并。其中，全局@InitBinder方法优先。
+	 *
+	 * 	题外：全局的@InitBinder方法是在初始化适配器的时候，RequestMappingHandlerAdapter#afterProperties()里面进行初始化的
+	 * 	题外：方便后面在进行值处理的过程中，能通过@InitBinder方法来处理相关值。
+	 *
+	 * @param handlerMethod
+	 * @return
+	 * @throws Exception
+	 */
 	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) throws Exception {
 		// 获取方法所归属的Controller bean的类型
 		Class<?> handlerType = handlerMethod.getBeanType();
@@ -1241,8 +1254,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				// 获取controllerAdviceBean的bean对象
 				Object bean = controllerAdviceBean.resolveBean();
 				for (Method method : methodSet) {
-					// ⚠️里面将@InitBinder方法，适配为可执行的HandlerMethod（InvocableHandlerMethod），并设置了：InitBinder的参数解析器、数据绑定工厂、参数名称发现器
-					initBinderMethods.add(createInitBinderMethod(bean, method));
+					// ⚠️里面将@InitBinder方法，适配为可执行的HandlerMethod：InvocableHandlerMethod，
+					// 并设置了：InitBinder的参数解析器、数据绑定工厂、参数名称发现器
+					initBinderMethods.add(/* ⚠️InvocableHandlerMethod */createInitBinderMethod(bean, method));
 				}
 			}
 		});
@@ -1251,7 +1265,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		/**
 		 * 题外：initBinderMethods是个List，以及从下面的合并操作，看得出来，如果有相同的@InitBinder方法，全局的@InitBinder方法和Controller的@InitBinder方法，并不会覆盖！
 		 */
-
 		// 将当前handler中的initBinder方法添加到initBinderMethods
 		for (Method method : methods) {
 			// 创建当前方法对应的bean对象
@@ -1279,13 +1292,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		/* 2、往InvocableHandlerMethod里面设置一些属性值：InitBinder的参数解析器、数据绑定工厂、参数名称发现器 */
 
-		// 设置所有的InitBinder的参数解析器
+		// (1)设置所有的InitBinder的参数解析器
 		if (this.initBinderArgumentResolvers/* 初始化绑定器的参数解析器 */ != null) {
 			binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
 		}
-		// 设置数据绑定工厂
+		// (2)设置数据绑定工厂
 		binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
-		// 设置参数名称发现器
+		// (3)设置参数名称发现器
 		binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
 		return binderMethod;
 	}
@@ -1301,7 +1314,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected InitBinderDataBinderFactory createDataBinderFactory(List<InvocableHandlerMethod> binderMethods)
 			throws Exception {
 
-		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
+		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer()/* ⚠️获取全局初始化器 */);
 	}
 
 	@Nullable

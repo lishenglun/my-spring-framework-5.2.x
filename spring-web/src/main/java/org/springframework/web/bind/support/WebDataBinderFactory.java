@@ -21,7 +21,11 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
+ * 在参数解析器ArgumentResolver中被使用，用于创建WebDataBinder
+ *
  * A factory for creating a {@link WebDataBinder} instance for a named target object.
+ *
+ * 为命名目标对象创建 {@link WebDataBinder} 实例的工厂。
  *
  * @author Arjen Poutsma
  * @since 3.1

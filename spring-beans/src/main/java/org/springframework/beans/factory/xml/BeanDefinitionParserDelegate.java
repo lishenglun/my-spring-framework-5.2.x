@@ -1377,10 +1377,11 @@ public class BeanDefinitionParserDelegate/* bd解析器委托 */ {
 			return null;
 		}
 		/**
-		 * 1、如果是<context:component-scan>的话，那么handler=ContextNamespaceHandler
-		 * 2、如果是<aop:config>的话，那么handler=AopNamespaceHandler（AopNamespaceHandler extends NamespaceHandlerSupport）
-		 * 3、如果是<tx:advice>的话，那么handler=TxNamespaceHandler
-		 * 4、如果是<context:property-placeholder location=""/>，那么handler=ContextNamespaceHandler
+		 * 1、如果是<context:component-scan>，它的namespaceUri=http://www.springframework.org/schema/context，所以handler=ContextNamespaceHandler
+		 * 2、如果是<aop:config>，它的namespaceUri=http://www.springframework.org/schema/aop，所以handler=AopNamespaceHandler（AopNamespaceHandler extends NamespaceHandlerSupport）
+		 * 3、如果是<tx:advice>，它的namespaceUri=http://www.springframework.org/schema/tx，所以handler=TxNamespaceHandler
+		 * 4、如果是<context:property-placeholder location=""/>，它的namespaceUri=http://www.springframework.org/schema/context，所以handler=ContextNamespaceHandler，
+		 * 5、如果是<mvc:annotation-driven/>，它的namespaceUri=http://www.springframework.org/schema/mvc，所以handler=MvcNamespaceHandler
 		 */
 		// 🚩这行代码很重要！
 		// 加载所有spring.handlers文件的内容；通过spring.handlers文件的内容，根据"命名空间uri"找到对应的"命名空间处理器"

@@ -45,7 +45,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
-	// WebDataBinderFactory类型，可以创建WebDataBinder，用于参数解析器ArgumentResolver中
+	// WebDataBinderFactory：在参数解析器ArgumentResolver中被使用，用于创建WebDataBinder
 	@Nullable
 	private WebDataBinderFactory dataBinderFactory;
 
@@ -150,6 +150,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
+	 * 获取方法实际的参数值
+	 *
 	 * Get the method argument values for the current request, checking the provided
 	 * argument values and falling back to the configured argument resolvers.
 	 * <p>The resulting array will be passed into {@link #doInvoke}.

@@ -98,7 +98,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * 查找给定请求的处理程序方法
+	 * 查找当前请求的HandlerMethod(处理程序方法)
 	 *
 	 * 题外：@Controller定义的handler时，会把里面每一个@RequestMapping修饰的方法封装为HandlerMethod
 	 *

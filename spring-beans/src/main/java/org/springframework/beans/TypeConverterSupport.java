@@ -37,6 +37,13 @@ import java.lang.reflect.Field;
  */
 public abstract class TypeConverterSupport extends PropertyEditorRegistrySupport implements TypeConverter {
 
+	/**
+	 * 1、创建处：在{@link org.springframework.validation.DataBinder#convertIfNecessary(Object, Class, MethodParameter)}
+	 * ——> {@link org.springframework.validation.DataBinder#getTypeConverter()}
+	 * ——> {@link org.springframework.validation.DataBinder#getSimpleTypeConverter()}
+	 * ——> new SimpleTypeConverter() = {@link SimpleTypeConverter#SimpleTypeConverter()}，
+	 * ——> 创建SimpleTypeConverter时，内部创建了TypeConverterDelegate
+	 */
 	// 类型转换器委托器：委托给TypeConverterDelegate来转换
 	@Nullable
 	TypeConverterDelegate typeConverterDelegate;

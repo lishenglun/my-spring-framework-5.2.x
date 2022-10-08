@@ -44,6 +44,7 @@ public interface WebBindingInitializer {
 	 */
 	@Deprecated
 	default void initBinder(WebDataBinder binder, WebRequest request) {
+		// ConfigurableWebBindingInitializer
 		initBinder(binder);
 	}
 

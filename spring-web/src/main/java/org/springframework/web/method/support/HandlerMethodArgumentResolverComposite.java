@@ -128,7 +128,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 		}
 
 		/* 2、用参数解析器解析参数 */
-		// AbstractNamedValueMethodArgumentResolver
+		// AbstractNamedValueMethodArgumentResolver#resolveArgument()
 		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 	}
 

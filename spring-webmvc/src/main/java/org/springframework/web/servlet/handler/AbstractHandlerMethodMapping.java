@@ -806,7 +806,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.writeLock().lock();
 			try {
 
-				/* 1、创建method对应的HandlerMethod，代表了处理请求的方法 */
+				/* 1、⚠️创建method对应的HandlerMethod，代表了处理请求的方法 */
 				// 根据handler和method创建一个HandlerMethod，代表了请求映射的方法
 				// 题外：现在要根据方法来进行映射，所以要创建一个处理器方法的对象
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);

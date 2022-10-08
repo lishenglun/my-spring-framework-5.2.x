@@ -135,6 +135,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@Nullable
 	private String[] requiredFields;
 
+	/**
+	 * 1、由来：
+	 * 解析单个方法参数值，{@link org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver#resolveArgument()}
+	 * ——> binderFactory.createBinder()⚠️创建WebDataBinder = ServletRequestDataBinderFactory的父类{@link org.springframework.web.bind.support.DefaultDataBinderFactory#createBinder()}
+	 * ——> this.initializer.initBinder()⚠️调用全局初始化器，初始化WebDataBinder = ConfigurableWebBindingInitializer实现的接口{@link org.springframework.web.bind.support.WebBindingInitializer#initBinder()}
+	 * ——> initBinder() = {@link org.springframework.web.bind.support.ConfigurableWebBindingInitializer#initBinder()}
+	 * ——> binder.setConversionService() = {@link DataBinder#setConversionService(ConversionService)}
+	 */
+	// ConversionService
 	@Nullable
 	private ConversionService conversionService;
 
@@ -307,34 +316,31 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * 获取类型转换器，没有就创建一个类型转换器
+	 * 获取typeConverter(类型转换器)，没有就创建：SimpleTypeConverter
 	 *
-	 * Return this binder's underlying SimpleTypeConverter.
+	 * Return this binder's underlying SimpleTypeConverter. —— 返回此绑定器的基础SimpleTypeConverter
 	 */
 	protected SimpleTypeConverter getSimpleTypeConverter() {
-		/*
-
-		1、获取类型转换器，没有就创建一个类型转换器：SimpleTypeConverter
-
-		注意：在创建类型转换器的构造函数里面，创建了一个类型转换器委托器
-
-		 */
-		// 1、如果类型转换器为空，则创建一个简单的类型转换器
+		// 1、没有typeConverter(类型转换器)，就创建：SimpleTypeConverter(简单的类型转换器)
 		if (this.typeConverter == null) {
-			// 注意：里面创建了一个类型转换器委托器：TypeConverterDelegate
+
+			// (1)创建typeConverter：SimpleTypeConverter(简单的类型转换器)
+			// 注意：⚠️里面创建了一个TypeConverterDelegate(类型转换器委托器)，并且TypeConverterDelegate当中保存了SimpleTypeConverter
 			this.typeConverter = new SimpleTypeConverter();
 
-			// 2、如果存在转换服务，就往类型转换器当中设置转换服务
+			// (2)⚠️往typeConverter中设置conversionService
 			if (this.conversionService != null) {
 				this.typeConverter.setConversionService(this.conversionService);
 			}
+
 		}
-		// 3、返回类型转换器
+
+		// 2、返回类型转换器
 		return this.typeConverter;
 	}
 
 	/**
-	 * 获取属性编辑器注册表（其实就是个类型转换器，类型转换器，间接实现PropertyEditorRegistry）
+	 * 获取属性编辑器注册表（其实就是个typeConverter(类型转换器)：SimpleTypeConverter。SimpleTypeConverter间接实现PropertyEditorRegistry）
 	 *
 	 * Return the underlying TypeConverter of this binder's BindingResult. —— 返回此绑定器的 BindingResult 的基础 TypeConverter。
 	 */
@@ -343,13 +349,15 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			return getInternalBindingResult().getPropertyAccessor();
 		}
 		else {
-			// 获取类型转换器：SimpleTypeConverter。
-			// SimpleTypeConverter间接实现PropertyEditorRegistry
+			// 获取typeConverter(类型转换器)：SimpleTypeConverter
+			// 题外：SimpleTypeConverter间接实现PropertyEditorRegistry，所以可以以PropertyEditorRegistry形式返回
 			return getSimpleTypeConverter();
 		}
 	}
 
 	/**
+	 * 获取类型转换器：SimpleTypeConverter
+	 *
 	 * Return the underlying TypeConverter of this binder's BindingResult.
 	 */
 	protected TypeConverter getTypeConverter() {
@@ -357,7 +365,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			return getInternalBindingResult().getPropertyAccessor();
 		}
 		else {
-			// 返回一个类型转换器：SimpleTypeConverter
+			// ⚠️返回一个类型转换器：SimpleTypeConverter
 			return getSimpleTypeConverter();
 		}
 	}
@@ -596,6 +604,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public void setConversionService(@Nullable ConversionService conversionService) {
 		Assert.state(this.conversionService == null, "DataBinder is already initialized with ConversionService");
+		// ⚠️
 		this.conversionService = conversionService;
 		if (this.bindingResult != null && conversionService != null) {
 			this.bindingResult.initConversion(conversionService);
@@ -697,11 +706,11 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	@Nullable
 	public <T> T convertIfNecessary(@Nullable Object value/* 参数值 */, @Nullable Class<T> requiredType/* 参数类型 */,
 			@Nullable MethodParameter methodParam/* 单个方法参数 */) throws TypeMismatchException {
-
 		/**
-		 * 1、getTypeConverter()：获取类型转换器：SimpleTypeConverter。
-		 * SimpleTypeConverter继承TypeConverterSupport，所以走的是TypeConverterSupport
+		 * 1、getTypeConverter()：获取typeConverter(型转换器)：SimpleTypeConverter
 		 */
+		// 调用typeConverter，转换参数值(如果需要)
+		// SimpleTypeConverter继承TypeConverterSupport，所以走的是TypeConverterSupport
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 

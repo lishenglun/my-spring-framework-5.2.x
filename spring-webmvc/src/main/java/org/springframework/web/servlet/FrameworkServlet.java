@@ -597,7 +597,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		/*
 
-		2、获取当前容器（WebApplicationContext），也就是spring mvc容器
+		2、刷新spring mvc容器（WebApplicationContext）
 
 		题外：下面是获取spring mvc容器的几种方式。根据不同的配置方式来选择合理的方式获取spring mvc容器
 
@@ -679,7 +679,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (wac == null) {
 			// No context instance is defined for this servlet -> create a local one
 			// 上面翻译：没有为此 servlet 定义上下文实例 -> 创建一个本地实例
-
+			/* 刷新spring mvc容器 */
 			// 当前面两种方式都没有获取到WebApplicationContext的时候，则去创建一个WebApplicationContext对象
 			// 题外：一般情况下都是使用这样的方式
 			wac = createWebApplicationContext(rootContext/* 父容器 */);

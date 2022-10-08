@@ -16,8 +16,6 @@
 
 package org.springframework.context.support;
 
-import java.util.Set;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.convert.ConversionService;
@@ -26,7 +24,11 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.lang.Nullable;
 
+import java.util.Set;
+
 /**
+ * 既可以使用GenericConversionService，又可以注入Converter的类，那就是ConversionServiceFactoryBean
+ *
  * A factory providing convenient access to a ConversionService configured with
  * converters appropriate for most environments. Set the
  * {@link #setConverters "converters"} property to supplement the default converters.
@@ -58,7 +60,6 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	@Nullable
 	private GenericConversionService conversionService;
 
-
 	/**
 	 * Configure the set of custom converter objects that should be added:
 	 * implementing {@link org.springframework.core.convert.converter.Converter},
@@ -69,11 +70,18 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 		this.converters = converters;
 	}
 
+	/**
+	 * 在当前ConversionServiceFactoryBean对象初始化完成之后，会调用该方法。
+	 * 该方法内部会new一个GenericConversionService对象，并往GenericConversionService中注册converters属性指定的Converter和Spring自身已经实现了的默认Converter，
+	 */
 	// bean初始化结束之后，注册自定义的转换器进去
 	@Override
 	public void afterPropertiesSet() {
-		// ⚠️创建了一个ConversionService = DefaultConversionService
+		// ⚠️创建了一个ConversionService(DefaultConversionService)对象
+		// 题外：⚠️里面️添加默认的转换器
 		this.conversionService = createConversionService();
+
+		// 注册converter
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
 	}
 
@@ -84,12 +92,16 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 	 * gets created.
 	 */
 	protected GenericConversionService createConversionService() {
+		// ⚠️里面️添加默认的转换器
 		return new DefaultConversionService();
 	}
 
 
 	// implementing FactoryBean
 
+	/**
+	 * 获取ConversionService
+	 */
 	@Override
 	@Nullable
 	public ConversionService getObject() {

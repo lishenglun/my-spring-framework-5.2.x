@@ -802,14 +802,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 							"cancelling refresh attempt: " + ex);
 				}
 
+				/* 销毁已经创建的bean */
 				// Destroy already created singletons to avoid dangling resources. —— 销毁已经创建的单例以避免悬空资源。
-				// 销毁前面过程中已经创建的bean对象
-				// 为防止bean资源占用，在异常处理中，销毁已经在前面过程中生成的单例bean
+				// 销毁已经创建的bean（为防止bean占用资源，在异常处理中，销毁已经在前面创建的单例bean）
 				destroyBeans();
 
-				// Reset 'active' flag.
-				// 重置当前容器的状态标识，标识说已经不是活跃的了
-				// 重置active标识
+				/* 取消刷新操作，重置容器的active标识为不是活跃的  */
+				// Reset 'active' flag. —— 重置active标识
+				// 重置当前容器的active标识，标识说已经不是活跃的了
 				cancelRefresh(ex);
 
 				// Propagate exception to caller.
@@ -1304,25 +1304,31 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Finish the initialization of this context's bean factory,initializing all remaining singleton beans. - 完成此上下文的bean工厂的初始化，初始化所有剩余的单例bean。
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
-		/* 1、设置类型转换服务 */
+		/* 1、判断beanFactory中有没有ConversionService，有的话就设置ConversionService(类型转换服务)到AbstractBeanFactory.conversionService变量上 */
 
 		/**
-		 * 题外：具体的转换器，最终都是要放入到ConversionService里面添加
-		 * 题外：ConversionService小知识点,参考：https://www.cnblogs.com/diyunpeng/p/6366386.html
-		 * 题外：Service的含义：提供的是一整个服务，服务里面包含了各种各样的转换器，由转换器来完成具体的操作
-		 * 题外：对应的转换器接口有：（1）Converter：1对1的转换；（2）GenericConverter：1对多的转换；（3）ConverterFactory：多对多的转换
+		 * 1、题外：具体的转换器，最终都是要放入到ConversionService里面添加
+		 * 2、题外：ConversionService小知识点,参考：https://www.cnblogs.com/diyunpeng/p/6366386.html
+		 * 3、题外：Service的含义：提供的是一整个服务，服务里面包含了各种各样的转换器，由转换器来完成具体的操作
+		 * 4、题外：⚠️对应的转换器接口有：
+		 * （1）Converter：1对1的转换；
+		 * 只支持从一个原类型转换为一个目标类型
+		 *
+		 * （2）GenericConverter：1对多的转换；
+		 * 支持在多个不同的原类型和目标类型之间进行转换
+		 *
+		 * （3）ConverterFactory：多对多的转换。
+		 * ConverterFactory就是产生Converter的一个工厂。
+		 * ConverterFactory接口只支持从一个原类型转换为一个目标类型对应的子类型
 		 */
 
-		// Initialize conversion service for this context. - 为此上下文初始化 转换服务。
+		// Initialize conversion service for this context. - 为此上下文初始化转换服务。
 		// 为上下文初始化类型转换服务
-		if (// 是否包含id为conversionService的bean
-				beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)/* conversionService */ &&
-						// 如果有id为conversionService的Bean，这个Bean又是否是ConversionService类型
 
-						beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME/* conversionService */, ConversionService.class)) {
-			// 如果有id为conversionService的bean，且是ConversionService类型，那么就设置进去
-			beanFactory.setConversionService/* 设置转换服务 */(
-					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME/* conversionService */, ConversionService.class));
+		// 判断是否有"beanName=conversionService 且类型等于ConversionService"的bean对象。有的话就设置ConversionService(类型转换服务)
+		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)/* conversionService */ &&
+				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME/* conversionService */, ConversionService.class)) {
+			beanFactory.setConversionService/* 设置转换服务 */(beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 
 		/*
@@ -1418,20 +1424,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// 上下文刷新的通知，例如自动启动的组件
 		getLifecycleProcessor().onRefresh();
 
-		/* 4、发送容器刷新完成事件 */
+		/* 4、发送"容器刷新完成"事件 */
 		// Publish the final event. —— 发布最终事件。
-		// 发布事件
 		/**
 		 * 当前的AbstractApplicationContext是事件源；
 		 * 事件源发布事件，发布事件之后会调用多播器的方法来进行广播事件；
 		 * 广播事件也就是，多播器调用多个具体的监听器，传入事件
 		 * 监听器收到事件后，判断是否能处理，能处理就处理，不能就不处理！
 		 */
-		// 发送通知说，容器已经刷新完成了
 		publishEvent(new ContextRefreshedEvent/* 上下文刷新事件（事件对象） */(this));
 
-		/* 5、 */
-		// Participate in LiveBeansView MBean, if active. —— 参与 LiveBeansView MBean（如果处于活动状态）。
+		/* 5、注册应用程序上下文 */
+		// Participate in LiveBeansView MBean, if active. —— 参与LiveBeansView MBean（如果处于活动状态）。
 		LiveBeansView.registerApplicationContext(this);
 	}
 

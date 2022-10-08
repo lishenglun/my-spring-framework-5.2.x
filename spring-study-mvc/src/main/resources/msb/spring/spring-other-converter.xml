@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/aop
+	   http://www.springframework.org/schema/aop/spring-aop.xsd
+	   http://www.springframework.org/schema/context
+	   https://www.springframework.org/schema/context/spring-context.xsd"
+>
+
+	<!--	配置类型转换工厂	-->
+	<bean id="converterService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+		<!--	给工厂注入一个新的类型转换器	-->
+		<property name="converters">
+			<array>
+				<!--	配置自定义类型转换器	-->
+				<bean class="com.springstudymvc.msb.other.converter.StringToDateConverter"/>
+			</array>
+		</property>
+	</bean>
+
+</beans>

@@ -212,6 +212,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		if (td == null) {
 			td = cachedIntrospectionResults.addTypeDescriptor(pd, new TypeDescriptor(property(pd))); // 添加类型描述符
 		}
+		// 注意：⚠️里面牵扯ConversionService
 		return convertForProperty(propertyName, null, value, td); // ⚠️转换对应的属性值！
 	}
 

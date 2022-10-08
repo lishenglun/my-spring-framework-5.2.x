@@ -17,6 +17,18 @@
 package org.springframework.core.convert.converter;
 
 /**
+ * 注册或者移除相关的类型转换器
+ *
+ * >>> 要实现自己的类型转换逻辑我们可以实现Converter接口、ConverterFactory接口和GenericConverter接口。
+ * >>> ConverterRegistry接口就分别为这三种类型提供了对应的注册方法。
+ * >>> 之所以提供了不同的方法来注册Converter、ConverterFactory、GenericConverter，是因为这三个接口，在接口之间没有任何的关系，也就是互相之间并不实现
+ *
+ * 题外：虽然Converter接口、ConverterFactory接口和GenericConverter接口之间没有任何的关系，
+ * 但是Spring内部在注册Converter实现类和ConverterFactory实现类时是先把它们转换为GenericConverter，之后再统一对GenericConverter进行注册的。
+ * 也就是说Spring内部会把Converter和ConverterFactory全部转换为GenericConverter进行注册，在Spring注册的容器中只存在GenericConverter这一种类型转换器。
+ * 我想之所以给用户开放Converter接口和ConverterFactory接口是为了让我们能够更方便的实现自己的类型转换器。
+ * 基于此，Spring官方也提倡我们在进行一些简单类型转换器定义时更多的使用Converter接口和ConverterFactory接口，在非必要的情况下少使用GenericConverter接口
+ *
  * For registering converters with a type conversion system.
  *
  * @author Keith Donald
@@ -26,6 +38,8 @@ package org.springframework.core.convert.converter;
 public interface ConverterRegistry {
 
 	/**
+	 * 注册Converter
+	 *
 	 * Add a plain converter to this registry.
 	 * The convertible source/target type pair is derived from the Converter's parameterized types.
 	 * @throws IllegalArgumentException if the parameterized types could not be resolved
@@ -42,11 +56,15 @@ public interface ConverterRegistry {
 	<S, T> void addConverter(Class<S> sourceType, Class<T> targetType, Converter<? super S, ? extends T> converter);
 
 	/**
+	 * 注册GenericConverter
+	 *
 	 * Add a generic converter to this registry.
 	 */
 	void addConverter(GenericConverter converter);
 
 	/**
+	 * 注册ConverterFactory
+	 *
 	 * Add a ranged converter factory to this registry.
 	 * The convertible source/target type pair is derived from the ConverterFactory's parameterized types.
 	 * @throws IllegalArgumentException if the parameterized types could not be resolved

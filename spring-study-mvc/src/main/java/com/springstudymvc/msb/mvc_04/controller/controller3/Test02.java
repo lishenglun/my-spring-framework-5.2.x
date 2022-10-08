@@ -1,4 +1,4 @@
-package com.springstudymvc.msb.mvc_04.controller.testController;
+package com.springstudymvc.msb.mvc_04.controller.controller3;
 
 import org.springframework.web.HttpRequestHandler;
 

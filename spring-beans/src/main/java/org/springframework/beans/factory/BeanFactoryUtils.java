@@ -57,7 +57,7 @@ public abstract class BeanFactoryUtils {
 
 
 	/**
-	 * 判断当前给定的beanName是否有factoryBean的前缀
+	 * 判断beanName是否以&符号开始（判断beanName是否有factoryBean的前缀）
 	 *
 	 * Return whether the given name is a factory dereference
 	 * (beginning with the factory dereference prefix).
@@ -66,7 +66,7 @@ public abstract class BeanFactoryUtils {
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
 	 */
 	public static boolean isFactoryDereference(@Nullable String name) {
-		// 判断name的开头是否包含&符号
+		// 判断beanName是否以&符号开始
 		return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX/* & */));
 	}
 

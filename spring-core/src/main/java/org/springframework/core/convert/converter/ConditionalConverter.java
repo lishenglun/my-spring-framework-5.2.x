@@ -19,7 +19,8 @@ package org.springframework.core.convert.converter;
 import org.springframework.core.convert.TypeDescriptor;
 
 /**
- * 根据source和target来做条件判断，从而判断哪个转换器生效哪个转换器不生效
+ * 定义有条件的类型转换器：根据source和target来做条件判断，从而判断哪个转换器生效哪个转换器不生效。
+ * 也就是说不是简单的满足类型匹配就可以使用该类型转换器进行类型转换了，必须要满足某种条件才能使用该类型转换器。
  *
  * Allows a {@link Converter}, {@link GenericConverter} or {@link ConverterFactory} to
  * conditionally execute based on attributes of the {@code source} and {@code target}

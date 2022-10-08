@@ -1,4 +1,4 @@
-package com.springstudymvc.msb.mvc_04.controller.testController;
+package com.springstudymvc.msb.mvc_04.controller.controller3;
 
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;

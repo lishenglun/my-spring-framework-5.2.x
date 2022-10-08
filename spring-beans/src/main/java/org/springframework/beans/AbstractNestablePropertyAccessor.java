@@ -16,25 +16,8 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyChangeEvent;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.security.PrivilegedActionException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
@@ -44,6 +27,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyChangeEvent;
+import java.lang.reflect.*;
+import java.security.PrivilegedActionException;
+import java.util.*;
 
 /**
  * A basic {@link ConfigurablePropertyAccessor} that provides the necessary
@@ -588,6 +576,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		Assert.state(this.typeConverterDelegate != null, "No TypeConverterDelegate");
 		try {
 			// ⚠️转换对应的属性值！
+			// 注意：⚠️里面牵扯ConversionService
 			return this.typeConverterDelegate.convertIfNecessary(propertyName, oldValue, newValue, requiredType, td);
 		}
 		catch (ConverterNotFoundException | IllegalStateException ex) {
@@ -606,7 +595,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	protected Object convertForProperty(
 			String propertyName, @Nullable Object oldValue, @Nullable Object newValue, TypeDescriptor td)
 			throws TypeMismatchException {
-
+		// 注意：⚠️里面牵扯ConversionService
 		return convertIfNecessary(propertyName, oldValue, newValue, td.getType(), td); // ⚠️转换对应的属性值！
 	}
 

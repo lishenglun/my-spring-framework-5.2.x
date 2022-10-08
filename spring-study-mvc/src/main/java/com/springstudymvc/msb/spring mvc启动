@@ -1,0 +1,4 @@
+1、main()是哪个？
+
+是依赖于tomcat启动，所以main方法采用的是tomcat的main()，我们只需要在web.xml中更改spring和spring mvc的配置文件即可，
+然后在spring和spring mvc的配置文件里面，就可以达到控制扫描加载哪个目录。

@@ -826,6 +826,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	/**
+	 * 初始化HandlerMappings
+	 *
 	 * Initialize the HandlerMappings used by this class.
 	 * <p>If no HandlerMapping beans are defined in the BeanFactory for this namespace,
 	 * we default to BeanNameUrlHandlerMapping.
@@ -889,6 +891,12 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		题外：以这种方式获取的顺序就是DispatcherServlet.properties文件中的顺序！所以我们在配置的时候，想要顺序的话，就可以调整配置的顺序！
 
+		 */
+		/**
+		 * DispatcherServlet.properties文件中，配置好的默认的HandlerMapping：
+		 * {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
+		 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}
+		 * {@link org.springframework.web.servlet.function.support.RouterFunctionMapping}
 		 */
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
@@ -963,6 +971,13 @@ public class DispatcherServlet extends FrameworkServlet {
 		题外：默认的HandlerAdapter有：HttpRequestHandlerAdapter,SimpleControllerHandlerAdapter,RequestMappingHandlerAdapter
 		题外：以这种方式获取的顺序就是DispatcherServlet.properties文件中的顺序！所以我们在配置的时候，想要顺序的话，就可以调整配置的顺序！
 
+		 */
+		/**
+		 * DispatcherServlet.properties文件中，获取配置好的默认的HandlerAdapter：
+		 * {@link org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter}
+		 * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter}
+		 * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter}
+		 * {@link org.springframework.web.servlet.function.support.HandlerFunctionAdapter}
 		 */
 		// Ensure we have at least some HandlerAdapters, by registering
 		// default HandlerAdapters if no other adapters are found.
@@ -1554,7 +1569,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 				/*
 
-				2、获取处理当前请求的Handler执行链，里面包含了处理器(handler：controller)和拦截器。
+				2、获取处理当前请求的Handler执行链，里面包含了：(1)处理器(handler：controller)；(2)拦截器
 
 				题外：牵扯到HandlerMapping。通过HandlerMapping找到处理请求的handler执行链。
 
@@ -1661,15 +1676,28 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				/* 6、执行适配器，通过适配器调用处理器，来处理请求。 */
-
+				/* 6、通过适配器来处理我们具体的请求。适配器内部调用处理器，来处理请求。 */
 				// Actually invoke the handler. —— 实际上调用处理程序。
+				/**
+				 * 1、RequestMappingHandlerAdapter
+				 *
+				 * RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter，所以走的是AbstractHandlerMethodAdapter
+				 *
+				 * RequestMappingHandlerAdapter内部相对复杂，有一大堆处理
+				 *
+				 * 2、HttpRequestHandlerAdapter
+				 *
+				 * 内部很简单，直接调用HttpRequestHandler#handleRequest(request, response);
+				 *
+				 * 3、SimpleControllerHandlerAdapter
+				 *
+				 * 内部很简单，直接调用Controller#handleRequest(request, response);
+				 */
+				// 实际处理请求的地方：真正的调用处理器方法，返回视图
+				// 题外：mv = ModeAndView，最终返回到前端进行属性回显的时候，用的就是这个ModeAndView对象
+				mv/* ModeAndView */ = ha/* HandleAdapter */.handle(processedRequest, response, mappedHandler.getHandler());
 
-				// 实际处理请求的地方 —— 真正的调用handler方法，也就是执行对应的方法，并返回视图
-				// ha = HandleAdapter，我们在处理的时候，根据这个适配器来处理我们具体的请求，也就是说我怎么去执行具体的业务逻辑
-				// mv = ModeAndView，最终返回到前端进行属性回显的时候，用的就是这个ModeAndView对象
-				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-
+				/* 如果当前请求中启动了异步处理，那么直接结束当前方法，中断当前线程后续的处理！继而当前线程会被销毁！由异步线程处理完毕之后，返回结果！ */
 				// 判断当前有没有启动异步处理，如果启动了异步处理，则直接返回null，中断当前线程后续的处理！继而当前线程会被销毁！由异步线程处理完毕之后，返回结果！
 				// 题外：如果在上面调用具体handler的过程中，返回值是一个异步任务，那么一定会开启线程，执行异步处理；
 				// >>> 在开启之前，肯定是把"是否开启异步处理的标识"设置了为true，再开启异步线程的！
@@ -1686,7 +1714,6 @@ public class DispatcherServlet extends FrameworkServlet {
 				常用的viewNameTranslator是DefaultRequestToViewNameTranslator
 
 				*/
-
 				/**
 				 * 1、viewName视图名称有可能为空吗？
 				 * 有，例如加了一个@ResponseBody，就是不返回视图，直接把结果值进行返回，这个时候时候视图名称就为空。
@@ -1715,6 +1742,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+
 			/* 10、处理返回结果，里面包含：渲染页面、处理异常、执行Interceptor的afterCompletion()，等操作 */
 			// 处理返回结果，也包括处理异常、渲染页面、触发Interceptor的afterCompletion
 			// 题外：也就是说，你现在已经返回了一个View，有了对应的视图了，当你有了对应的操作之后，我开始进行相关的回显，包括页面渲染等相关操作

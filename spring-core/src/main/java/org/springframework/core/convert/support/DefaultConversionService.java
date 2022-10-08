@@ -49,7 +49,7 @@ public class DefaultConversionService extends GenericConversionService {
 	 * {@linkplain DefaultConversionService#addDefaultConverters(ConverterRegistry) default converters}.
 	 */
 	public DefaultConversionService() {
-		// 添加默认的转换器
+		// ⚠️添加一堆spring的默认转换器
 		addDefaultConverters(this);
 	}
 

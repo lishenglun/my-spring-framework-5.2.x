@@ -886,14 +886,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
+	/**
+	 * 实例化单例
+	 *
+	 * @throws BeansException
+	 */
 	@Override
 	public void preInstantiateSingletons() throws BeansException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Pre-instantiating singletons in " + this);
 		}
 
+		/* 1、获取beanDefinitionNames，挨个初始化bean */
+
 		/**
-		 * 获取所有要初始化的BD名称
+		 * 获取所有要初始化的beanName
 		 */
 		// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 		// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
@@ -909,14 +916,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// ⚠️合并父BeanDefinition：也就是xml<bean parent="">标签的
 			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
 
-			// 条件判断，抽象，单例，非懒加载
+			/* 只有"不是抽象的，是单例，非懒加载"，才进行初始化bean */
 			if (!bd.isAbstract()/* 是否是抽象 */ && bd.isSingleton()/* 是否是单例 */ && !bd.isLazyInit()/* 是否是懒加载 */) {
 				// 只有【不是抽象的、是单例、不是懒加载】的才成立
 
 				// 以下是对加载到的bd进行bean的初始化。
 				// 调用的getBean()：先从容器中获取，没有再创建！
 
-				// 如果是实现了FactoryBean
+				/* 如果实现FactoryBean */
 				if (isFactoryBean(beanName)) {
 					/**
 					 * ⚠️如果实现了FactoryBean接口，就加上【&】，也就是以getBean(&+beanName)这样的形式去获取bean，代表我获取的是FactoryBean实例，而不是FactoryBean#getObject()！
@@ -949,7 +956,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						}
 					}
 				}
-				// 如果不是FactoryBean，只是普通的bean，通过beanName获取bean实例
+				/* 如果没有实现FactoryBean，只是普通的bean，通过beanName获取bean实例 */
 				else {
 					// ⚠️进入这里
 					getBean(beanName);
@@ -959,7 +966,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		/*
 
-		下面for循环做的事情：表示在所有的bean初始化后，如果有bean实现了SmartInitializingSingleton接口，则会运行该实现类的afterSingletonsInstantiated()方法
+		2、下面for循环做的事情：表示在所有的bean初始化后，如果有bean实现了SmartInitializingSingleton接口，则会运行该实现类的afterSingletonsInstantiated()方法
 		SmartInitializingSingleton(智能初始化单例)参考：https://blog.csdn.net/qq_22871607/article/details/90074988
 
 		可以用于对bean对象的处理工作，比如：属性的设置工作、检查，等工作
