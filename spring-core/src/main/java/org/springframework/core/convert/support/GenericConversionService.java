@@ -49,6 +49,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	/**
 	 * 不需要转换时使用的转换器
 	 *
+	 * 题外：只有没有原始类型和目标类型对应的转换器，转换器才是"不需要转换时使用的转换器"
+	 *
 	 * General NO-OP converter used when conversion is not required. —— 不需要转换时使用的通用NO-OP转换器
 	 */
 	private static final GenericConverter NO_OP_CONVERTER = new NoOpConverter("NO_OP");
@@ -178,6 +180,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	/**
+	 * 判断转换器是不是"不需要转换时使用的转换器"，
+	 * （1）是的话，返回true，也就是说，可以绕过转换，不进行转换！
+	 * （2）不是的话，返回false，代表不可以绕过转换，需要进行转换
+	 *
+	 * 题外：只有没有原始类型和目标类型对应的转换器，转换器才是"不需要转换时使用的转换器"
+	 *
 	 * Return whether conversion between the source type and the target type can be bypassed.
 	 * <p>More precisely, this method will return true if objects of sourceType can be
 	 * converted to the target type by returning the source object unchanged.
@@ -188,13 +196,16 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @throws IllegalArgumentException if targetType is {@code null}
 	 * @since 3.2
 	 */
-	public boolean canBypassConvert(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
+	public boolean canBypassConvert/* 可以绕过转换 */(@Nullable TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType, "Target type to convert to cannot be null");
 		if (sourceType == null) {
 			return true;
 		}
+		// 获取GenericConverter
 		GenericConverter converter = getConverter(sourceType, targetType);
-		return (converter == NO_OP_CONVERTER);
+
+		// 判断转换器是不是"不需要转换时使用的转换器"
+		return (converter == NO_OP_CONVERTER/* 不需要转换时使用的转换器 */);
 	}
 
 	/* -------------------------------- 执行转换器 -------------------------------- */
@@ -645,8 +656,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 *                          2、GenericConverter的话，不变
 		 */
 		public void add(GenericConverter converter) {
+			/**
+			 * 1、题外：虽然得到的是一个集合，但是一般只有一个元素。例如：
+			 * （1）{@link GenericConversionService.ConverterAdapter#getConvertibleTypes()}，固定只有一个元素！
+			 * （2）{@link GenericConversionService.ConverterFactoryAdapter#getConvertibleTypes()}，固定只有一个元素！
+			 * （3）⚠️只有当{@link GenericConverter#getConvertibleTypes()}时，才可能有多个元素
+			 */
 			// 获取"原始类型和目标类型组成的键值对"集合
-			// 题外：虽然得到的是一个集合，但是一般只有一个元素，例如：GenericConversionService.ConverterAdapter#getConvertibleTypes()，固定只有一个元素！
 			Set<ConvertiblePair> convertibleTypes/* 可转换类型 */ = converter.getConvertibleTypes();
 
 			// 没有原始类型和目标类型，那么就将这个转换器，添加到全局转换器集合当中
@@ -655,10 +671,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 						"Only conditional converters may return null convertible types");
 				this.globalConverters.add(converter);
 			}
-			// 有原始类型和目标类型，就添加到非全局转换器集合当中
+			// 有原始类型和目标类型，就添加到非全局转换器集合当中：以"原始类型和目标类型组合而成的键值对"进行分组，存放相同原始类型和目标类型的转换器
 			else {
 				for (ConvertiblePair convertiblePair : convertibleTypes) {
-					// 获取存放"相同原始类型和目标类型"的ConvertersForPair
+					// 获取-存放"相同原始类型和目标类型的转换器"-的ConvertersForPair
 					ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
 					// 加转换器添加到ConvertersForPair中
 					convertersForPair.add(converter);
@@ -703,7 +719,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			for (Class<?> sourceCandidate : sourceCandidates) {
 				// 遍历目标类型的层级结构
 				for (Class<?> targetCandidate : targetCandidates) {
-					// 原始类型和目标类型组成的键值对组合
+					// "原始类型层级结构中的某一类型"和"目标类型层级结构中的某一个类型"相组合，也就是：原始类型和目标类型组成的键值对组合
 					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate);
 					// 通过原始类型和目标类型，获取Converter
 					GenericConverter converter = getRegisteredConverter(sourceType, targetType, convertiblePair);
@@ -826,7 +842,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 
 	/**
-	 * 保存"相同键值对类型"的转换器，也就是存放相同原始类型和目标类型的转换器（管理通过ConvertiblePair注册的转换器）
+	 * 保存"相同键值对类型"的转换器，也就是存放"相同原始类型和目标类型的转换器"（管理通过ConvertiblePair注册的转换器）
 	 *
 	 * Manages converters registered with a specific {@link ConvertiblePair}. —— 管理向特定{@link ConvertiblePair}注册的转换器。
 	 */
@@ -871,7 +887,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 
 	/**
-	 * Internal converter that performs no operation.
+	 * 不需要转换时，使用的转换器
+	 *
+	 * Internal converter that performs no operation. —— 不执行任何操作的内部转换器
 	 */
 	private static class NoOpConverter implements GenericConverter {
 

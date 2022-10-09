@@ -23,9 +23,28 @@ import org.springframework.util.Assert;
 import java.util.Set;
 
 /**
- * 支持在多个不同的原类型和目标类型之间进行转换
+ * 一个GenericConverter支持转换多个不同的"原始类型和目标类型的键值对组合"。属于多对多，比如：一个原始类型Integer可以转换为n种目标类型，同样n多个原始类型可以转换为同一个目标类型Integer
  *
- * 用于两种或者更多种类型之间转换的通用转换器接口（1对多，1个可以转换成多个类型）
+ * 例如：
+ * public Set<ConvertiblePair> getConvertibleTypes() {
+ *
+ * 		Set<ConvertiblePair> pairs = new HashSet<ConvertiblePair>();
+ * 		// Integer.class 转换为 String.class
+ * 		pairs.add(new ConvertiblePair(Integer.class, String.class));
+ * 		// Long.class 转换为 User.class
+ * 		pairs.add(new ConvertiblePair(Long.class, User.class));
+ * 		// Person.class 转换为 Member.class
+ * 		pairs.add(new ConvertiblePair(Person.class, Member.class));
+ * 		// .. 可以添加n多个不同的"原始类型和目标类型的键值对组合"
+ *
+ * 		// 多对多示范：
+ * 		pairs.add(new ConvertiblePair(Integer.class, Long.class));
+ * 		pairs.add(new ConvertiblePair(Integer.class, User.class));
+ * 		pairs.add(new ConvertiblePair(Long.class, Integer.class));
+ * 		pairs.add(new ConvertiblePair(User.class, Integer.class));
+ *
+ * 		return pairs;
+ * }
  *
  * 题外：虽然Converter接口、ConverterFactory接口和GenericConverter接口之间没有任何的关系(接口之间没有互相实现)，
  * 但是Spring内部在注册Converter实现类和ConverterFactory实现类时是先把它们转换为GenericConverter，之后再统一对GenericConverter进行注册的。
@@ -61,6 +80,10 @@ public interface GenericConverter {
 	 * 返回这个GenericConverter能够转换的原类型和目标类型的这么一个组合
 	 *
 	 * 返回转换器集合，可以转换源和目标类型
+	 *
+	 *
+	 * 多个不同的ConvertiblePair使用同一个GenericConverter进行转换，也就是一个GenericConverter支持转换多个不同的"原始类型和目标类型的键值对组合"
+	 *
 	 *
 	 * Return the source and target types that this converter can convert between.
 	 * <p>Each entry is a convertible source-to-target type pair.

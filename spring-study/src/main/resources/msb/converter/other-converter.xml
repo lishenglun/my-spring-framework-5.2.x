@@ -5,7 +5,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
 	   default-autowire="constructor">
 
-	<bean id="user" class="com.springstudy.msb.other.converter.User">
+	<bean id="user" class="com.springstudy.msb.other.converter.GenericConverter.User">
 		<!--	10086是字符串，会自动转换为int	-->
 		<property name="id" value="10086"/>
 	</bean>

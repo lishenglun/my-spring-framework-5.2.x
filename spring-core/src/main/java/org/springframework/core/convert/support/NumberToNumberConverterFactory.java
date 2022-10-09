@@ -65,6 +65,7 @@ final class NumberToNumberConverterFactory implements ConverterFactory<Number, N
 		public T convert(Number source) {
 			return NumberUtils.convertNumberToTargetClass(source, this.targetType);
 		}
+
 	}
 
 }

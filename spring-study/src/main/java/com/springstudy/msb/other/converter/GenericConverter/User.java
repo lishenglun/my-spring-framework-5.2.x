@@ -1,4 +1,4 @@
-package com.springstudy.msb.other.converter;
+package com.springstudy.msb.other.converter.GenericConverter;
 
 /**
  * @author lishenglun

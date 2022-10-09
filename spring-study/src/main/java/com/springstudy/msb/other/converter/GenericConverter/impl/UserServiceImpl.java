@@ -1,7 +1,7 @@
-package com.springstudy.msb.other.converter.impl;
+package com.springstudy.msb.other.converter.GenericConverter.impl;
 
-import com.springstudy.msb.other.converter.User;
-import com.springstudy.msb.other.converter.UserService;
+import com.springstudy.msb.other.converter.GenericConverter.User;
+import com.springstudy.msb.other.converter.GenericConverter.UserService;
 
 /**
  * @author lishenglun

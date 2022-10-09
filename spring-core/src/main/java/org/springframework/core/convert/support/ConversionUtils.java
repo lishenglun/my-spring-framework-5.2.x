@@ -86,12 +86,21 @@ abstract class ConversionUtils {
 		return false;
 	}
 
+	/**
+	 * 获取枚举类型
+	 *
+	 * @param targetType		目标类型
+	 * @return		枚举类型Class
+	 */
 	public static Class<?> getEnumType(Class<?> targetType) {
 		Class<?> enumType = targetType;
+
 		while (enumType != null && !enumType.isEnum()) {
 			enumType = enumType.getSuperclass();
 		}
+
 		Assert.notNull(enumType, () -> "The target type " + targetType.getName() + " does not refer to an enum");
+
 		return enumType;
 	}
 

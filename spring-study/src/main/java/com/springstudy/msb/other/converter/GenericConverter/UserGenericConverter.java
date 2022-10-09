@@ -1,4 +1,4 @@
-package com.springstudy.msb.other.converter;
+package com.springstudy.msb.other.converter.GenericConverter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
@@ -21,12 +21,14 @@ public class UserGenericConverter implements GenericConverter {
 		}
 
 		User user = null;
-		// 简单的根据原类型是Integer还是String来判断传递的原数据是id还是username，并利用UserService对应的方法返回相应的User对象
+
+		/* 简单的根据原类型是Integer还是String来判断传递的原数据是id还是username，并利用UserService对应的方法返回相应的User对象 */
+		// 如果原始类型是Integer，就假设为是id，所以根据id来查找user
 		if (sourceType.getType() == Integer.class) {
-			// 根据id来查找user
 			user = userService.findById((Integer) source);
-		} else if (sourceType.getType() == String.class) {
-			// 根据用户名来查找user
+		}
+		// 如果原始类型是String，就假设为是username，所以根据用户名来查找user
+		else if (sourceType.getType() == String.class) {
 			user = userService.find((String) source);
 		}
 		return user;

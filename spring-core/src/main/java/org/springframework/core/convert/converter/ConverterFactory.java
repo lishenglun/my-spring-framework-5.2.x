@@ -17,18 +17,40 @@
 package org.springframework.core.convert.converter;
 
 /**
- * 顾名思义，ConverterFactory就是产生Converter的一个工厂，用来获取对应的转换器。
+ * 一、ConverterFactory：用于集中生产-"一个类型"转换为"某个类型的整个层次结构中的所有类型"的-Converter。属于一对多。
+ * 也就是说，为了集中"某个类型的整个层次结构"的转换逻辑，也就是说：一个原始类型转换为"某个类型的整个层次结构中的所有类型"用的是同一套Converter的逻辑。
  *
- * 注意：⚠️但是通过ConverterFactory获取的Converter和我们直接定义的Converter不同：ConverterFactory获取的Converter，它的目标类型必须是ConverterFactory目标类型的子类或者相同
+ * 1、⚠️为了集中"某个类型的整个层次结构"的转换逻辑（集中了一个原始类型转换到"某个类型的整个层次结构"的转换逻辑），
+ * 也就是说：一个原始类型转换为"某个类型的整个层次结构中的所有类型"用的是同一套Converter的逻辑；
+ *
+ * 题外：⚠️当需要集中整个类层次结构的转换逻辑时（例如，从转换String为Enum对象时），可以实现ConverterFactory。
+ *
+ * 例如：Integer extends Number、Long extends Number
+ * >>> 如果是ConverterFactory<String,Number>；
+ * >>> 那么String转换为Integer，String转换为Long，都由这个ConverterFactory<String,Number>生成的Converter来转换！
+ *
+ * 2、如果一对"原始类型和目标类型"匹配到ConverterFactory，就会通过ConverterFactory，️每次️动态生成一个转换指定"原始类型和目标类型"的Converter
+ *
+ * 题外：⚠️每次匹配到ConverterFactory，然后，每次调用ConverterFactory都会通过ConverterFactory动态生成一个Converter，然后再调用具体的Converter进行转换！
+ *
+ * 例如：Integer extends Number、Long extends Number
+ * >>> 如果是ConverterFactory<String,Number>；
+ * >>> 如果是String转换为Integer，那么这个ConverterFactory<String,Number>会动态生成一个String转Number的转换器：Converter<String，Number>
+ * >>> 如果是String转换为Long，那么这个ConverterFactory<String,Number>会动态生成一个String转Long的转换器：Converter<String，Long>
+ * >>> 这2个Converter的转换逻辑是一样的！
+ *
+ * 3、属于一对多。一个原始类型，可以转换为某个类型(R)的整个层级结构中的所有类型，也就是说：一个原始类型，可以转换为R类型，或者R类型下所有子孙中的任一员
+ *
+ * 题外：顾名思义，ConverterFactory就是产生Converter的一个工厂，用来获取对应的转换器。
  * 题外：ConverterFactory接口只支持从一个原类型转换为一个目标类型对应的子类型。
  *
+ * 题外：⚠️但是通过ConverterFactory获取的Converter和我们直接定义的Converter不同：ConverterFactory获取的Converter，它的目标类型必须是ConverterFactory R类型的子类或者相同
+ *
  * A factory for "ranged" converters that can convert objects from S to subtypes of R.
+ * <p>Implementations may additionally implement {@link ConditionalConverter}.
  *
  * “范围”转换器的工厂，可以将对象从 S 转换为 R 的子类型。
- *
- * 题外：一个类型包含它具体的子类类型，我都可以完成具体的转换操作
- *
- * <p>Implementations may additionally implement {@link ConditionalConverter}.
+ * <p>实现可以另外实现 {@link ConditionalConverter}。
  *
  * @author Keith Donald
  * @since 3.0
@@ -37,6 +59,7 @@ package org.springframework.core.convert.converter;
  * for example {@link Number} for a set of number subtypes.
  * @see ConditionalConverter
  */
+// 参数化S为要转换的类型，R为定义可转换为的类范围的基本类型
 public interface ConverterFactory<S, R> {
 
 	/**
