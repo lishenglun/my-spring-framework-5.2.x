@@ -47,6 +47,7 @@ final class CharacterToNumberFactory implements ConverterFactory<Character, Numb
 
 	private static final class CharacterToNumber<T extends Number> implements Converter<Character, T> {
 
+		// 目标类型
 		private final Class<T> targetType;
 
 		public CharacterToNumber(Class<T> targetType) {
@@ -57,6 +58,7 @@ final class CharacterToNumberFactory implements ConverterFactory<Character, Numb
 		public T convert(Character source) {
 			return NumberUtils.convertNumberToTargetClass((short) source.charValue(), this.targetType);
 		}
+
 	}
 
 }

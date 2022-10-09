@@ -46,8 +46,13 @@ abstract class ConversionUtils {
 			TypeDescriptor sourceType, TypeDescriptor targetType) {
 
 		try {
+			/**
+			 * 1、{@link GenericConversionService.ConverterAdapter#convert(Object, TypeDescriptor, TypeDescriptor)}
+			 * 2、{@link GenericConversionService.ConverterFactoryAdapter#convert(Object, TypeDescriptor, TypeDescriptor)}
+			 * 3、{@link GenericConverter#convert(Object, TypeDescriptor, TypeDescriptor)} —— 直接调用实现类
+			 * 4、如果没有转换器的话，就是{@link GenericConversionService.NoOpConverter#convert(Object, TypeDescriptor, TypeDescriptor)}，直接返回原始数据
+			 */
 			// ⚠️调用转换器
-			/** {@link GenericConversionService.ConverterAdapter#convert(Object, TypeDescriptor, TypeDescriptor)}  */
 			return converter.convert(source, sourceType, targetType);
 		}
 		catch (ConversionFailedException ex) {

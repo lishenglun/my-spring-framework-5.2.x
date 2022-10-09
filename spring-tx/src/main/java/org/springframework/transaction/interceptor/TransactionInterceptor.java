@@ -52,7 +52,7 @@ import java.util.Properties;
  * @see org.springframework.aop.framework.ProxyFactory
  */
 @SuppressWarnings("serial")
-public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
+public class TransactionInterceptor/* 事务拦截器 */ extends TransactionAspectSupport implements MethodInterceptor, Serializable {
 
 	/**
 	 * Create a new TransactionInterceptor.

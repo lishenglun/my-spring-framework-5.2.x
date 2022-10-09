@@ -34,7 +34,7 @@ package org.springframework.core;
  * @author Juergen Hoeller
  * @since 4.3
  */
-public interface DecoratingProxy {
+public interface DecoratingProxy/* 装饰代理 */ {
 
 	/**
 	 * Return the (ultimate) decorated class behind this proxy.

@@ -274,8 +274,23 @@ public class TypeDescriptor/* 类型描述符 */ implements Serializable {
 	}
 
 	/**
+	 * 1、isAssignableTo()：
+	 * （1）调用者是参数的子类，或者和参数相同，就返回true；
+	 * （2）调用者是参数的超类，则返回false
+	 *
+	 * 例如：A.isAssignableTo(A)，返回true
+	 * 例如：A.isAssignableTo(B)，A extends B，A是B的子类，返回true
+	 * 例如：B.isAssignableTo(A)，由于A extends B，B是A的父类，所以返回false
+	 *
+	 * 2、isAssignableFrom()：
+	 * （1）调用者是参数的超类，或者和参数相同，就返回true；
+	 * （2）调用者是参数的子类，则返回false
+	 *
 	 * Returns true if an object of this type descriptor can be assigned to the location
 	 * described by the given type descriptor.
+	 *
+	 * 如果此类型描述符的对象可以分配给给定类型描述符所描述的位置，则返回true。
+	 *
 	 * <p>For example, {@code valueOf(String.class).isAssignableTo(valueOf(CharSequence.class))}
 	 * returns {@code true} because a String value can be assigned to a CharSequence variable.
 	 * On the other hand, {@code valueOf(Number.class).isAssignableTo(valueOf(Integer.class))}
@@ -283,11 +298,27 @@ public class TypeDescriptor/* 类型描述符 */ implements Serializable {
 	 * <p>For arrays, collections, and maps, element and key/value types are checked if declared.
 	 * For example, a List&lt;String&gt; field value is assignable to a Collection&lt;CharSequence&gt;
 	 * field, but List&lt;Number&gt; is not assignable to List&lt;Integer&gt;.
+	 *
+	 *
+	 * <p>例如，{@code valueOf(String.class).isAssignableTo(valueOf(CharSequence.class))} 返回 {@code true}，因为可以将 String 值分配给 CharSequence 变量。
+	 * 另一方面，{@code valueOf(Number.class).isAssignableTo(valueOf(Integer.class))} 返回 {@code false} 因为虽然所有整数都是数字，但并非所有数字都是整数。
+	 * <p>对于数组、集合和映射，如果声明了元素和键值类型，则会对其进行检查。例如，List<String> 字段值可分配给 Collection<CharSequence> 字段，但 List<Number> 不可分配给 List<Integer>。
+	 *
+	 * 题外：String implements java.io.Serializable, Comparable<String>, CharSequence
+	 * 题外：Integer extends Number
+	 *
 	 * @return {@code true} if this type is assignable to the type represented by the provided
 	 * type descriptor
 	 * @see #getObjectType()
 	 */
 	public boolean isAssignableTo(TypeDescriptor typeDescriptor) {
+		/**
+		 * 1、Class#isAssignableFrom()：
+		 * （1）调用者是参数的超类，或者和参数相同，就返回true；
+		 * （2）调用者是参数的子类，则返回false
+		 *
+		 * 实验参考：{@link com.springstudy.msb.other.typeDescriptor.TypeDescriptorMain#test_isAssignableFrom()}
+		 */
 		boolean typesAssignable = typeDescriptor.getObjectType().isAssignableFrom(getObjectType());
 		if (!typesAssignable) {
 			return false;

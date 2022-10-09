@@ -81,19 +81,21 @@ public interface GenericConverter {
 	 * @param targetType the type descriptor of the field we are converting to
 	 * @return the converted object
 	 */
+	// 完成对应类型的转换，只是当前这个类型，不再是规定的T类型了，而是TypeDescriptor(类的描述信息)
 	@Nullable
 	Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
-// 完成对应类型的转换，只是当前这个类型，不再是规定的T类型了，而是TypeDescriptor(类的描述信息)
 
 	/**
-	 * 组建一个源到目的的组合
+	 * 原始类型和目标类型组成的键值对组合
 	 *
-	 * Holder for a source-to-target class pair.
+	 * Holder for a source-to-target class pair. —— 源到目标类对的持有者
 	 */
-	final class ConvertiblePair {
+	final class ConvertiblePair/* 可转换对 */ {
 
+		// 原始类型
 		private final Class<?> sourceType;
 
+		// 目标类型
 		private final Class<?> targetType;
 
 		/**
