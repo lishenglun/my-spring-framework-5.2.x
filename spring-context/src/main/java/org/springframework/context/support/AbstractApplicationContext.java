@@ -1307,19 +1307,19 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		/* 1、判断beanFactory中有没有ConversionService，有的话就设置ConversionService(类型转换服务)到AbstractBeanFactory.conversionService变量上 */
 
 		/**
-		 * 1、题外：具体的转换器，最终都是要放入到ConversionService里面添加
-		 * 2、题外：ConversionService小知识点,参考：https://www.cnblogs.com/diyunpeng/p/6366386.html
-		 * 3、题外：Service的含义：提供的是一整个服务，服务里面包含了各种各样的转换器，由转换器来完成具体的操作
-		 * 4、题外：⚠️对应的转换器接口有：
-		 * （1）Converter：1对1的转换；
-		 * 只支持从一个原类型转换为一个目标类型
+		 * 1、ConversionService小知识点，参考：https://www.cnblogs.com/diyunpeng/p/6366386.html
 		 *
-		 * （2）GenericConverter：1对多的转换；
-		 * 支持在多个不同的原类型和目标类型之间进行转换
+		 * 题外：⚠️Service的含义：提供的是一整个服务，服务里面包含了各种各样的转换器，由转换器来完成具体的操作
+		 * 题外：具体的转换器，最终都是要放入到ConversionService里面添加
 		 *
-		 * （3）ConverterFactory：多对多的转换。
-		 * ConverterFactory就是产生Converter的一个工厂。
-		 * ConverterFactory接口只支持从一个原类型转换为一个目标类型对应的子类型
+		 * 2、对应的转换器接口有：
+		 * （1）Converter：1对1的转换；只支持从一个原类型转换为一个目标类型
+		 *
+		 * （2）ConverterFactory：1对多的转换；支持一个原始类型转换为某个类型的整个层次结构中的所有类型，
+		 * 也就是从一个原类型转换为一个目标类型，或者目标类型对应的子类型
+		 *
+		 * （3）GenericConverter：多对多的转换；
+		 * 支持转换多个不同的"原始类型和目标类型的键值对组合"
 		 */
 
 		// Initialize conversion service for this context. - 为此上下文初始化转换服务。
